@@ -5,7 +5,12 @@
         <el-input v-model="form.username" placeholder="用户名/手机"></el-input>
       </el-form-item>
       <el-form-item prop="password">
-        <el-input v-model="form.password" placeholder="密码" type="password"></el-input>
+        <el-input
+          v-model="form.password"
+          placeholder="密码"
+          type="password"
+          @keyup.enter.native="onSubmit"
+        ></el-input>
       </el-form-item>
       <p class="pwdNone">
         <a href="/">忘记密码</a>
