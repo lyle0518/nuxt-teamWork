@@ -6,3 +6,23 @@ export const mutations = {
     state.userInfo = data;
   }
 };
+// 公共的方法,用来处理同个功能不同需求操作
+export const actions = {
+  // 第一个参数是Store对象, 第二个参数是传入的参数(不固定)
+  login(store, data) {
+    return this.$axios({
+      url: "/accounts/login",
+      method: "POST",
+      data
+    }).then(res => {
+      // console.log(res);
+      const { data } = res;
+      // console.log(this.$store.state);
+      // 同个模块调用可以省去user
+      store.commit("setUserInfo", data);
+      // console.log(this.$store.state);
+      // this.$router.push("/");
+      return data;
+    });
+  }
+};

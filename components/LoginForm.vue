@@ -44,16 +44,12 @@ export default {
       this.$refs.form.validate(valid => {
         if (valid) {
           console.log(this.form);
-          this.$axios({
-            url: "/accounts/login",
-            method: "POST",
-            data: this.form
-          }).then(res => {
+          //  调用仓库里的公共的方法
+          this.$store.dispatch("user/login", this.form).then(res => {
+            // 因为需要获取用户名,此时的res值由上一个then return的值决定
             console.log(res);
-            const { data } = res;
-            // console.log(this.$store.state);
-            this.$store.commit("user/setUserInfo", data);
-            console.log(this.$store.state);
+
+            this.$message.success("登录成功,欢迎回来 " + res.user.nickname);
             this.$router.push("/");
           });
         } else {
@@ -61,6 +57,22 @@ export default {
           return false;
         }
       });
+      // 换一种写法
+      // this.$refs.form.validate(async valid => {
+      //   if (valid) {
+      //     console.log(this.form);
+      //     //  调用仓库里的公共的方法
+      //     await this.$store.dispatch("user/login", this.form);
+      //     // 因为需要获取用户名,此时的res值由上一个then return的值决定
+      //     console.log(res);
+
+      //     this.$message.success("登录成功,欢迎回来");
+      //     this.$router.push("/");
+      //   } else {
+      //     console.log("error submit!!");
+      //     return false;
+      //   }
+      // });
     }
   }
 };
