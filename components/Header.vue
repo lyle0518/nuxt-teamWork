@@ -19,13 +19,19 @@
       <!-- 登录后的用户信息 -->
       <el-dropdown v-if="$store.state.user.userInfo.token">
         <el-row type="flex" align="middle" class="el-dropdown-link">
-          <img :src="$axios.defaults.baseURL+$store.state.user.userInfo.user.defaultAvatar" alt />
-          <span>{{$store.state.user.userInfo.user.nickname}}</span>
+          <img
+            :src="
+              $axios.defaults.baseURL +
+                $store.state.user.userInfo.user.defaultAvatar
+            "
+            alt
+          />
+          <span>{{ $store.state.user.userInfo.user.nickname }}</span>
           <span class="el-icon-caret-bottom"></span>
         </el-row>
         <el-dropdown-menu slot="dropdown">
           <el-dropdown-item>个人中心</el-dropdown-item>
-          <el-dropdown-item>退出</el-dropdown-item>
+          <el-dropdown-item @click.native="handleLogout">退出</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
       <!-- 登录/用户信息 -->
@@ -50,7 +56,9 @@
         </el-dropdown>
 
         <!-- 不存在用户信息展示登录注册链接 -->
-        <nuxt-link to="/user/login" class="account-link" v-else>登录 / 注册</nuxt-link>
+        <nuxt-link to="/user/login" class="account-link" v-else
+          >登录 / 注册</nuxt-link
+        >
       </el-row>
     </el-row>
   </header>
@@ -59,7 +67,10 @@
 export default {
   methods: {
     // 用户退出
-    handleLogout() {}
+    handleLogout() {
+      this.$store.commit("user/setUserInfo", {});
+      this.$message.success("退出成功!");
+    }
   }
 };
 </script>
