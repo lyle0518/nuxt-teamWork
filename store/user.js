@@ -24,5 +24,32 @@ export const actions = {
       // this.$router.push("/");
       return data;
     });
+  },
+  //验证码功能
+  sendCaptcha(store, tel) {
+    return this.$axios({
+      url: "captchas",
+      method: "POST",
+      data: { tel }
+    }).then(res => {
+      // console.log(res);
+      const { code } = res.data;
+      console.log("js文件内" + code);
+      return code;
+    });
+  },
+  //注册功能
+  register(store, data) {
+    return this.$axios({
+      url: "accounts/register",
+      method: "post",
+      data
+    }).then(res => {
+      const { data } = res;
+      // this.$message.success("注册成功");
+      // this.$router.push("/");
+      // 修改用户信息
+      store.commit("setUserInfo", data);
+    });
   }
 };

@@ -5,7 +5,7 @@
         <el-input v-model="form.username" placeholder="用户名手机"></el-input>
       </el-form-item>
       <!-- 验证码 -->
-      <el-form-item class="form-item">
+      <el-form-item class="form-item" prop="captcha">
         <el-input placeholder="验证码" v-model="form.captcha">
           <template slot="append">
             <el-button @click.native="handleSendCaptcha">
@@ -34,7 +34,7 @@
         ></el-input>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="onSubmit">注册</el-button>
+        <el-button type="primary" @click="RegisterSubmit">注册</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -64,8 +64,9 @@ export default {
         username: [
           { required: true, message: "请输入用户名", trigger: "blur" }
         ],
+        captcha: [{ required: true, message: "请输入验证码", trigger: "blur" }],
         password: [{ required: true, message: "请输入密码", trigger: "blur" }],
-        nickname: [],
+        nickname: [{ required: true, message: "请输入昵称", trigger: "blur" }],
         checkpassword: [{ validator: validatePass2, trigger: "blur" }]
       }
     };
@@ -74,17 +75,29 @@ export default {
   methods: {
     handleSendCaptcha() {
       //发送验证码
+      console.log(this.form.username);
+
+      // 自定义验证手机号码输入
+      if (this.form.username === "") {
+        this.$refs.form.validateField("username");
+        return;
+      }
+      //验证码功能
+      this.$store.dispatch("user/sendCaptcha", this.form.username).then(res => {
+        console.log(res);
+        this.$message.success("手机验证码为" + res);
+      });
     },
-    onSubmit() {
+    //注册
+    RegisterSubmit() {
+      // 删除this.form中的checkpassword
+      const { checkpassword, ...other } = this.form;
       this.$refs.form.validate(valid => {
         if (valid) {
           console.log(this.form);
           //  调用仓库里的公共的方法
-          this.$store.dispatch("user/login", this.form).then(res => {
-            // 因为需要获取用户名,此时的res值由上一个then return的值决定
-            console.log(res);
-
-            this.$message.success("登录成功,欢迎回来 " + res.user.nickname);
+          this.$store.dispatch("user/register", other).then(res => {
+            this.$message.success("恭喜您,注册成功");
             this.$router.push("/");
           });
         } else {
