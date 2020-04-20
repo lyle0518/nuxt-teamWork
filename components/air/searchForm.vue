@@ -13,8 +13,8 @@
       </span>
     </el-row>
 
-    <el-form class="search-form-content" ref="form" label-width="80px">
-      <el-form-item label="出发城市">
+    <el-form class="search-form-content" ref="form" :rules="rules" label-width="80px">
+      <el-form-item label="出发城市" prop="departCity">
         <!-- fetch-suggestions 返回输入建议的方法 -->
         <!-- select 点击选中建议项时触发 -->
         <el-autocomplete
@@ -26,7 +26,7 @@
           @blur="handleDepartBlur"
         ></el-autocomplete>
       </el-form-item>
-      <el-form-item label="到达城市">
+      <el-form-item label="到达城市" prop="destCity">
         <el-autocomplete
           :fetch-suggestions="queryDestSearch"
           placeholder="请搜索到达城市"
@@ -36,9 +36,17 @@
           @blur="handleDestBlur"
         ></el-autocomplete>
       </el-form-item>
-      <el-form-item label="出发时间">
+      <el-form-item label="出发时间" prop="departDate">
         <!-- change 用户确认选择日期时触发 -->
-        <el-date-picker type="date" placeholder="请选择日期" style="width: 100%;" @change="handleDate"></el-date-picker>
+        <el-date-picker
+          type="date"
+          v-model="form.departDate"
+          placeholder="请选择日期"
+          style="width: 100%;"
+          @change="handleDate"
+          value-format="yyyy-MM-dd"
+          :picker-options="pickerOptions"
+        ></el-date-picker>
       </el-form-item>
       <el-form-item label>
         <el-button style="width:100%;" type="primary" icon="el-icon-search" @click="handleSubmit">搜索</el-button>
@@ -58,12 +66,28 @@ export default {
         { icon: "iconfont icondancheng", name: "单程" },
         { icon: "iconfont iconshuangxiang", name: "往返" }
       ],
+      pickerOptions: {
+        disabledDate(time) {
+          return time.getTime() < Date.now() - 3600 * 1000 * 24;
+        }
+      },
       form: {
         departCity: "", //出发城市
         departCode: "", //出发城市代码
         destCity: "", //目标城市
         destCode: "", //目标城市代码
         departDate: "" //日期
+      },
+      rules: {
+        departCity: [
+          { required: true, message: "请输入出发城市", trigger: "blur" }
+        ],
+        destCity: [
+          { required: true, message: "请输入到达城市", trigger: "blur" }
+        ],
+        departDate: [
+          { required: true, message: "请选择出发时间", trigger: "blur" }
+        ]
       },
       currentTab: 0,
       departCities: [], //存储出发城市下拉列表的数据
@@ -146,7 +170,9 @@ export default {
     },
 
     // 确认选择日期时触发
-    handleDate(value) {},
+    handleDate(value) {
+      console.log(value);
+    },
 
     // 触发和目标城市切换时触发
     handleReverse() {},
