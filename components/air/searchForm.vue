@@ -13,7 +13,7 @@
       </span>
     </el-row>
 
-    <el-form class="search-form-content" ref="form" :rules="rules" label-width="80px">
+    <el-form class="search-form-content" :model="form" ref="form" :rules="rules" label-width="80px">
       <el-form-item label="出发城市" prop="departCity">
         <!-- fetch-suggestions 返回输入建议的方法 -->
         <!-- select 点击选中建议项时触发 -->
@@ -79,14 +79,15 @@ export default {
         departDate: "" //日期
       },
       rules: {
+        // 为了交互效果覆盖掉trigger的设置,只有在提交时才触发
         departCity: [
-          { required: true, message: "请输入出发城市", trigger: "blur" }
+          { required: true, message: "请输入出发城市", trigger: "abc" }
         ],
         destCity: [
-          { required: true, message: "请输入到达城市", trigger: "blur" }
+          { required: true, message: "请输入到达城市", trigger: "abc" }
         ],
         departDate: [
-          { required: true, message: "请选择出发时间", trigger: "blur" }
+          { required: true, message: "请选择出发时间", trigger: "abc" }
         ]
       },
       currentTab: 0,
@@ -103,6 +104,7 @@ export default {
     queryDepartSearch(value, cb) {
       // value的值是输入框的值
       if (!value) return;
+      this.$refs.form.validateField("departCity");
       this.$axios({
         url: "/airs/city",
         params: {
@@ -140,6 +142,8 @@ export default {
     // value 是选中的值，cb是回调函数，接收要展示的列表
     queryDestSearch(value, cb) {
       if (!value) return;
+      this.$refs.form.validateField("destCity");
+
       this.$axios({
         url: "/cities",
         params: {
@@ -171,6 +175,8 @@ export default {
 
     // 确认选择日期时触发
     handleDate(value) {
+      this.$refs.form.validateField("departDate");
+
       console.log(value);
     },
 
@@ -180,6 +186,11 @@ export default {
     // 提交表单是触发
     handleSubmit() {
       console.log(this.form);
+      this.$refs.form.validate(valid => {
+        if (valid) {
+          console.log(this.form);
+        }
+      });
     }
   },
   mounted() {}
