@@ -1,5 +1,5 @@
-export const state = {
-  userInfo: "李四"
+export const state = function() {
+  return { userInfo: "" };
 };
 export const mutations = {
   setUserInfo(state, data) {

@@ -38,6 +38,8 @@
       </el-form-item>
       <el-form-item label="出发时间" prop="departDate">
         <!-- change 用户确认选择日期时触发 -->
+        <!--  value-format  设置绑定值的格式,不设置的话默认为Date对象 -->
+        <!-- picker-options  设置日期的禁用 -->
         <el-date-picker
           type="date"
           v-model="form.departDate"
@@ -131,7 +133,6 @@ export default {
       }
     },
     // 到达城市失焦出发函数
-
     handleDestBlur() {
       if (this.departCities.length > 0) {
         this.form.destCity = this.destCities[0].value;
@@ -158,7 +159,7 @@ export default {
         });
         this.destCities = cites;
         cb(cites);
-        console.log(cites);
+        // console.log(cites);
       });
     },
 
@@ -189,6 +190,10 @@ export default {
       this.$refs.form.validate(valid => {
         if (valid) {
           console.log(this.form);
+          this.$router.push({
+            path: "air/flights",
+            query: this.form
+          });
         }
       });
     }
