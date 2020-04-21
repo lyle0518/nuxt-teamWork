@@ -4,26 +4,27 @@
       <!-- 显示的机票信息 -->
       <el-row type="flex" align="middle" class="flight-info">
         <el-col :span="6">
-          <span>东航</span> MU5316
+          <span>{{data.airline_name}}</span>
+          {{data.flight_no}}
         </el-col>
         <el-col :span="12">
           <el-row type="flex" justify="space-between" class="flight-info-center">
             <el-col :span="8" class="flight-airport">
-              <strong>20:30</strong>
-              <span>白云机场T1</span>
+              <strong>{{data.dep_time}}</strong>
+              <span>{{data.org_airport_name}}{{data.org_airport_quay}}</span>
             </el-col>
             <el-col :span="8" class="flight-time">
-              <span>2时20分</span>
+              <span>{{rankTime}}</span>
             </el-col>
             <el-col :span="8" class="flight-airport">
-              <strong>22:50</strong>
-              <span>虹桥机场T2</span>
+              <strong>{{data.arr_time}}</strong>
+              <span>{{data.dst_airport_name}}{{data.dst_airport_quay}}</span>
             </el-col>
           </el-row>
         </el-col>
         <el-col :span="6" class="flight-info-right">
           ￥
-          <span class="sell-price">810</span>起
+          <span class="sell-price">{{data.base_price / 2}}</span>起
         </el-col>
       </el-row>
     </div>
@@ -32,11 +33,19 @@
       <el-row type="flex" justify="space-between" align="middle">
         <el-col :span="4">低价推荐</el-col>
         <el-col :span="20">
-          <el-row type="flex" justify="space-between" align="middle" class="flight-sell">
+          <el-row
+            type="flex"
+            justify="space-between"
+            align="middle"
+            class="flight-sell"
+            v-for="(item,index) in data.seat_infos"
+            :key="index"
+          >
             <el-col :span="16" class="flight-sell-left">
-              <span>经济舱</span> | 上海一诺千金航空服务有限公司
+              <span>{{item.name}}</span>
+              | {{item.supplierName}}
             </el-col>
-            <el-col :span="5" class="price">￥1345</el-col>
+            <el-col :span="5" class="price">￥{{item.settle_price}}</el-col>
             <el-col :span="3" class="choose-button">
               <el-button type="warning" size="mini">选定</el-button>
               <p>剩余：83</p>
@@ -50,14 +59,41 @@
 
 <script>
 export default {
-  // props: {
-  //     // 数据
-  //     data: {
-  //         type: Object,
-  //         // 默认是空数组
-  //         default: {}
-  //     }
-  // }
+  //   props: ["data"],
+  props: {
+    data: {
+      type: Object,
+      default: {}
+    }
+  },
+  computed: {
+    //   飞行时间
+    // 涉及一些计算可以分摊到前端浏览器进行运算,节省后端服务器的压力
+    rankTime() {
+      //到达时间
+      const arr = this.data.arr_time.split(":");
+      //起飞时间
+      const dep = this.data.dep_time.split(":");
+      console.log(arr, dep);
+      //   飞行相隔时间,arr[0]乘法有隐式转换成数字,arr[1]仍是字符串
+
+      let dis = arr[0] * 60 + +arr[1] - (dep[0] * 60 + +dep[1]);
+      if (dis < 0) {
+        // dis = dis + 24 * 60;
+        dis = dis + 24 * 60;
+      }
+      console.log(dis);
+      //   转化成时间的格式
+      const hours = Math.floor(dis / 60);
+      const min = dis % 60;
+      return `${hours}时${min}分`;
+    }
+  },
+  mounted() {
+    // console.log(this.data);
+
+    console.log(this.rankTime);
+  }
 };
 </script>
 

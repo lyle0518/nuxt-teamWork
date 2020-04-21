@@ -235,6 +235,7 @@ export default {
       console.log(this.form);
       this.$refs.form.validate(valid => {
         if (valid) {
+          if (this.form.departCode === "" || this.form.destCode === "") return;
           console.log(this.form);
           this.$router.push({
             path: "air/flights",

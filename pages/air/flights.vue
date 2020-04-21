@@ -10,7 +10,7 @@
         <FlightsListHead />
 
         <!-- 航班信息 -->
-        <FlightsItem />
+        <FlightsItem v-for="(item,index) in aircity" :key='index' :data='item' />
       </div>
 
       <!-- 侧边栏 -->
@@ -31,7 +31,19 @@ export default {
     FlightsItem
   },
   data() {
-    return {};
+    return {
+      aircity: []
+    };
+  },
+  mounted() {
+    this.$axios({
+      url: "/airs",
+      params: this.$route.query
+    }).then(res => {
+      console.log(res);
+      const { data } = res;
+      this.aircity = data.flights;
+    });
   }
 };
 </script>
