@@ -98,16 +98,9 @@ export default {
     };
   },
   methods: {
-    // tab切换时触发
-    handleSearchTab(item, index) {},
-
-    // 出发城市输入框获得焦点时触发
-    // value 是选中的值，cb是回调函数，接收要展示的列表
-    queryDepartSearch(value, cb) {
-      // value的值是输入框的值
-      if (!value) return;
-      this.$refs.form.validateField("departCity");
-      this.$axios({
+    //封装搜索城市方法
+    getCities(value) {
+      return this.$axios({
         url: "/airs/city",
         params: {
           name: value
@@ -120,9 +113,47 @@ export default {
           v.value = v.name.replace("市", "");
           return v;
         });
-        this.departCities = cites;
-        cb(cites);
-        console.log(cites);
+        // this.departCities = cites;
+        // cb(cites);
+        return cites;
+        // console.log(cites);
+      });
+    },
+
+    // tab切换时触发
+    handleSearchTab(item, index) {},
+
+    // 出发城市输入框获得焦点时触发
+    // value 是选中的值，cb是回调函数，接收要展示的列表
+    queryDepartSearch(value, cb) {
+      // value的值是输入框的值
+      if (!value) {
+        cb([]);
+        this.departCities = [];
+        return;
+      }
+      this.$refs.form.validateField("departCity");
+      // this.$axios({
+      //   url: "/airs/city",
+      //   params: {
+      //     name: value
+      //   }
+      // }).then(res => {
+      //   console.log(res);
+      //   const { data } = res.data;
+      //   // cb这个参数是一个方法,需要传参,参数需要有value属性
+      //   const cites = data.map(v => {
+      //     v.value = v.name.replace("市", "");
+      //     return v;
+      //   });
+      //   this.departCities = cites;
+      //   cb(cites);
+      //   console.log(cites);
+      // });
+      this.getCities(value).then(res => {
+        // res的值为函数中return出来的cites
+        this.departCities = res;
+        cb(res);
       });
     },
     // 出发城市失焦出发函数
@@ -142,24 +173,33 @@ export default {
     // 目标城市输入框获得焦点时触发
     // value 是选中的值，cb是回调函数，接收要展示的列表
     queryDestSearch(value, cb) {
-      if (!value) return;
+      if (!value) {
+        cb([]);
+        this.departCities = [];
+        return;
+      }
       this.$refs.form.validateField("destCity");
 
-      this.$axios({
-        url: "/cities",
-        params: {
-          name: value
-        }
-      }).then(res => {
-        console.log(res);
-        const { data } = res.data;
-        const cites = data.map(v => {
-          v.value = v.name.replace("市", "");
-          return v;
-        });
-        this.destCities = cites;
-        cb(cites);
-        // console.log(cites);
+      // this.$axios({
+      //   url: "/cities",
+      //   params: {
+      //     name: value
+      //   }
+      // }).then(res => {
+      //   console.log(res);
+      //   const { data } = res.data;
+      //   const cites = data.map(v => {
+      //     v.value = v.name.replace("市", "");
+      //     return v;
+      //   });
+      //   this.destCities = cites;
+      //   cb(cites);
+      //   // console.log(cites);
+      // });
+      this.getCities(value).then(res => {
+        // res的值为函数中return出来的cites
+        this.destCities = res;
+        cb(res);
       });
     },
 
