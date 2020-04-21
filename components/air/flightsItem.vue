@@ -79,7 +79,6 @@ export default {
       const arr = this.data.arr_time.split(":");
       //起飞时间
       const dep = this.data.dep_time.split(":");
-      console.log(arr, dep);
       //   飞行相隔时间,arr[0]乘法有隐式转换成数字,arr[1]仍是字符串
 
       let dis = arr[0] * 60 + +arr[1] - (dep[0] * 60 + +dep[1]);
@@ -87,7 +86,6 @@ export default {
         // dis = dis + 24 * 60;
         dis = dis + 24 * 60;
       }
-      console.log(dis);
       //   转化成时间的格式
       const hours = Math.floor(dis / 60);
       const min = dis % 60;
@@ -96,8 +94,6 @@ export default {
   },
   mounted() {
     // console.log(this.data);
-
-    console.log(this.rankTime);
   }
 };
 </script>

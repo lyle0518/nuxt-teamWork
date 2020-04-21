@@ -10,13 +10,24 @@
         <FlightsListHead />
 
         <!-- 航班信息 -->
-        <FlightsItem v-for="(item,index) in aircity" :key='index' :data='item' />
+        <FlightsItem v-for="(item,index) in dataList" :key="index" :data="item" />
+        <el-pagination
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page="pageIndex"
+          :page-sizes="[3, 6, 9, 12]"
+          :page-size="pageSize"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="total"
+        ></el-pagination>
       </div>
 
       <!-- 侧边栏 -->
       <div class="aside">
         <!-- 侧边栏组件 -->
       </div>
+      <!-- 底部分页器 -->
+      <!-- 数据量少,可以一次性获取后台的数据,在前端进行分页处理 -->
     </el-row>
   </section>
 </template>
@@ -32,7 +43,12 @@ export default {
   },
   data() {
     return {
-      aircity: []
+      aircity: {},
+      pageIndex: 1,
+      total: 0,
+      // 存放剪切出来的数据列表
+      dataList: [],
+      pageSize: 3
     };
   },
   mounted() {
@@ -41,9 +57,38 @@ export default {
       params: this.$route.query
     }).then(res => {
       console.log(res);
-      const { data } = res;
-      this.aircity = data.flights;
+      this.aircity = res.data;
+      this.total = res.data.total;
+      //   请求成功后剪切出第一页5条数据
+      this.dataList = this.aircity.flights.slice(0, this.pageSize);
     });
+  },
+  methods: {
+    handleSizeChange(val) {
+      console.log(`每页 ${val} 条`);
+      //   切换页面数据条数 val为 :page-sizes定义的值
+      this.pageSize = val;
+      this.pageIndex = 1;
+
+      //   重新切割航班数据
+      this.dataList = this.aircity.flights.slice(
+        (this.pageIndex - 1) * this.pageSize,
+        this.pageIndex * this.pageSize
+      );
+      console.log(this.pageIndex);
+    },
+    // 切换页数触发
+    handleCurrentChange(val) {
+      // val为当前页码
+      //   切换页码,剪切出第二页的数据,赋值给dataList
+      //   更新当前的页码
+      this.pageIndex = val;
+      console.log(this.pageIndex);
+      this.dataList = this.aircity.flights.slice(
+        (this.pageIndex - 1) * this.pageSize,
+        this.pageIndex * this.pageSize
+      );
+    }
   }
 };
 </script>
@@ -62,4 +107,7 @@ export default {
 .aside {
   width: 240px;
 }
-</style>s
+.el-pagination {
+  text-align: center;
+}
+</style>
