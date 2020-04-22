@@ -94,7 +94,8 @@ export default {
       },
       currentTab: 0,
       departCities: [], //存储出发城市下拉列表的数据
-      destCities: [] //存储到达城市下拉列表的数据
+      destCities: [], //存储到达城市下拉列表的数据
+      flag: true
     };
   },
   methods: {
@@ -165,7 +166,7 @@ export default {
     },
     // 到达城市失焦出发函数
     handleDestBlur() {
-      if (this.departCities.length > 0) {
+      if (this.destCities.length > 0) {
         this.form.destCity = this.destCities[0].value;
         this.form.destCode = this.destCities[0].sort;
       }
@@ -223,11 +224,16 @@ export default {
 
     // 触发和目标城市切换时触发
     handleReverse() {
+      if (!this.flag) return;
+      this.flag = false;
       const { departCity, departCode, destCity, destCode } = this.form;
       this.form.departCity = destCity;
       this.form.departCode = destCode;
       this.form.destCity = departCity;
       this.form.destCode = departCode;
+      this.flag = true;
+
+      console.log("完全赋值完毕", this.form);
     },
 
     // 提交表单是触发
@@ -235,7 +241,6 @@ export default {
       console.log(this.form);
       this.$refs.form.validate(valid => {
         if (valid) {
-          if (this.form.departCode === "" || this.form.destCode === "") return;
           console.log(this.form);
           this.$router.push({
             path: "air/flights",

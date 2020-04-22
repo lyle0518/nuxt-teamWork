@@ -44,10 +44,12 @@ export default {
   data() {
     return {
       aircity: {},
+      //当前页面
       pageIndex: 1,
       total: 0,
       // 存放剪切出来的数据列表
       dataList: [],
+      //   每页显示的数据量
       pageSize: 3
     };
   },
@@ -65,7 +67,6 @@ export default {
   },
   methods: {
     handleSizeChange(val) {
-      console.log(`每页 ${val} 条`);
       //   切换页面数据条数 val为 :page-sizes定义的值
       this.pageSize = val;
       this.pageIndex = 1;
@@ -81,9 +82,9 @@ export default {
     handleCurrentChange(val) {
       // val为当前页码
       //   切换页码,剪切出第二页的数据,赋值给dataList
-      //   更新当前的页码
+      console.log("val的值" + val);
+      console.log("pageIndex的值" + this.pageIndex);
       this.pageIndex = val;
-      console.log(this.pageIndex);
       this.dataList = this.aircity.flights.slice(
         (this.pageIndex - 1) * this.pageSize,
         this.pageIndex * this.pageSize
