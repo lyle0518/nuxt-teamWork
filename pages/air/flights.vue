@@ -4,7 +4,7 @@
       <!-- 顶部过滤列表 -->
       <div class="flights-content">
         <!-- 过滤条件 -->
-        <div></div>
+        <FlightsFilters :data="aircity" @getData="getData" />
 
         <!-- 航班头部布局 -->
         <FlightsListHead />
@@ -35,15 +35,22 @@
 <script>
 import FlightsListHead from "@/components/air/flightsListHead";
 import FlightsItem from "@/components/air/flightsItem";
+import FlightsFilters from "@/components/air/flightsFilters";
 
 export default {
   components: {
     FlightsListHead,
-    FlightsItem
+    FlightsItem,
+    FlightsFilters
   },
   data() {
     return {
-      aircity: {},
+      aircity: {
+        //渲染的时候已经做了传值,如果没有做默认值设定,会报undefined
+        flights: [],
+        info: {},
+        options: []
+      },
       //当前页面
       pageIndex: 1,
       total: 0,
@@ -55,6 +62,7 @@ export default {
   },
   computed: {
     dataList() {
+      //如果flights的值变化,会重新计算
       const arr = this.aircity.flights.slice(
         (this.pageIndex - 1) * this.pageSize,
         this.pageIndex * this.pageSize
@@ -67,11 +75,13 @@ export default {
       url: "/airs",
       params: this.$route.query
     }).then(res => {
-      console.log(res);
+      // console.log(res);
       this.aircity = res.data;
+      console.log(this.aircity);
+
       this.total = res.data.total;
       //   请求成功后剪切出第一页5条数据
-      this.dataList = this.aircity.flights.slice(0, this.pageSize);
+      // this.dataList = this.aircity.flights.slice(0, this.pageSize);
     });
   },
   methods: {
@@ -89,6 +99,11 @@ export default {
       console.log("val的值" + val);
       console.log("pageIndex的值" + this.pageIndex);
       this.pageIndex = val;
+    },
+    // 组件传值
+    getData(arr) {
+      console.log(arr);
+      this.aircity.flights = arr;
     }
   }
 };
