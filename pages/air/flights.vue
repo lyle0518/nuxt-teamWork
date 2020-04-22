@@ -48,10 +48,19 @@ export default {
       pageIndex: 1,
       total: 0,
       // 存放剪切出来的数据列表
-      dataList: [],
+      //dataList: [],
       //   每页显示的数据量
       pageSize: 3
     };
+  },
+  computed: {
+    dataList() {
+      const arr = this.aircity.flights.slice(
+        (this.pageIndex - 1) * this.pageSize,
+        this.pageIndex * this.pageSize
+      );
+      return arr;
+    }
   },
   mounted() {
     this.$axios({
@@ -70,12 +79,7 @@ export default {
       //   切换页面数据条数 val为 :page-sizes定义的值
       this.pageSize = val;
       this.pageIndex = 1;
-
       //   重新切割航班数据
-      this.dataList = this.aircity.flights.slice(
-        (this.pageIndex - 1) * this.pageSize,
-        this.pageIndex * this.pageSize
-      );
       console.log(this.pageIndex);
     },
     // 切换页数触发
@@ -85,10 +89,6 @@ export default {
       console.log("val的值" + val);
       console.log("pageIndex的值" + this.pageIndex);
       this.pageIndex = val;
-      this.dataList = this.aircity.flights.slice(
-        (this.pageIndex - 1) * this.pageSize,
-        this.pageIndex * this.pageSize
-      );
     }
   }
 };
