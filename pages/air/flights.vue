@@ -4,7 +4,8 @@
       <!-- 顶部过滤列表 -->
       <div class="flights-content">
         <!-- 过滤条件 -->
-        <FlightsFilters :data="aircity" @getData="getData" />
+        <!-- 传一个不会被更改的值给子组件使用筛选功能 -->
+        <FlightsFilters :data="Copyaircity" @getData="getData" />
 
         <!-- 航班头部布局 -->
         <FlightsListHead />
@@ -51,6 +52,11 @@ export default {
         info: {},
         options: []
       },
+      Copyaircity: {
+        flights: [],
+        info: {},
+        options: []
+      },
       //当前页面
       pageIndex: 1,
       total: 0,
@@ -77,6 +83,8 @@ export default {
     }).then(res => {
       // console.log(res);
       this.aircity = res.data;
+      // 复制一个不会修改的数组用于传值给子组件筛选
+      this.Copyaircity = { ...res.data };
       console.log(this.aircity);
 
       this.total = res.data.total;
@@ -104,6 +112,7 @@ export default {
     getData(arr) {
       console.log(arr);
       this.aircity.flights = arr;
+      this.total = arr.length;
     }
   }
 };

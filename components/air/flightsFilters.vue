@@ -84,11 +84,23 @@ export default {
     // 选择机场时候触发
     handleAirport(value) {
       console.log(value);
+      const arr = this.data.flights.filter(v => {
+        // 筛选起飞机场和选择的机场一致
+        return v.org_airport_name === this.airport;
+      });
+      this.$emit("getData", arr);
     },
 
     // 选择出发时间时候触发
     handleFlightTimes(value) {
       console.log(value);
+      const time = this.flightTimes.split(","); //[6,12]
+      const arr = this.data.flights.filter(v => {
+        const current = v.dep_time.split(":")[0];
+        return +time[0] <= +current && +current < +time[1];
+      });
+      //   传出筛选好的数据
+      this.$emit("getData", arr);
     },
 
     // 选择航空公司时候触发
@@ -106,6 +118,12 @@ export default {
     // 选择机型时候触发
     handleAirSize(value) {
       console.log(value);
+      const arr = this.data.flights.filter(v => {
+        return v.plane_size === this.airSize;
+      });
+      console.log(arr);
+      //   将值传递给父组件
+      this.$emit("getData", arr);
     },
 
     // 撤销条件时候触发
