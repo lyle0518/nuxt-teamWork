@@ -65,7 +65,7 @@
                 :to="{
                   path: '/air/order',
                   query: {
-                    air: data.id,
+                    id: data.id,
                     seat_xid: item.seat_xid
                   }
                 }"

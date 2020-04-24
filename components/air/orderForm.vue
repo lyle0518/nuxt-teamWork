@@ -9,7 +9,11 @@
           :key="index"
         >
           <el-form-item label="乘机人类型">
-            <el-input placeholder="姓名" class="input-with-select">
+            <el-input
+              placeholder="姓名"
+              class="input-with-select"
+              v-model="item.username"
+            >
               <el-select slot="prepend" value="1" placeholder="请选择">
                 <el-option label="成人" value="1"></el-option>
               </el-select>
@@ -17,7 +21,11 @@
           </el-form-item>
 
           <el-form-item label="证件类型">
-            <el-input placeholder="证件号码" class="input-with-select">
+            <el-input
+              placeholder="证件号码"
+              class="input-with-select"
+              v-model="item.id"
+            >
               <el-select slot="prepend" value="1" placeholder="请选择">
                 <el-option label="身份证" value="1" :checked="true"></el-option>
               </el-select>
@@ -36,8 +44,18 @@
     <div class="air-column">
       <h2>保险</h2>
       <div>
-        <div class="insurance-item">
-          <el-checkbox label="航空意外险：￥30/份×1  最高赔付260万" border>
+        <div
+          class="insurance-item"
+          v-for="(item, index) in detail"
+          :key="index"
+        >
+          <el-checkbox
+            :label="
+              `${item.type}：￥${item.price}/份×1  最高赔付${item.compensation}`
+            "
+            @change="handleCheckbox(item.id)"
+            border
+          >
           </el-checkbox>
         </div>
       </div>
@@ -76,15 +94,31 @@ export default {
   data() {
     return {
       form: {
-        users: [{ username: "", id: "" }],
-        insurances: "",
-        contactName: "",
-        contactPhone: "",
-        invoice: false,
-        seat_xid: "",
-        air: ""
-      }
+        users: [{ username: "", id: "" }], //乘车人
+        insurances: [], //	保险id
+        contactName: "", //联系人名字
+        contactPhone: "", //联系人电话
+        invoice: false, //发票
+        seat_xid: "", //座位id
+        air: "", //航班信息
+        captcha: "" //验证码
+      },
+      //   存储保险信息
+      detail: []
     };
+  },
+  mounted() {
+    //获取保险信息
+    const { id, seat_xid } = this.$route.query;
+    this.$axios({
+      url: "/airs/" + id,
+      params: {
+        seat_xid
+      }
+    }).then(res => {
+      console.log(res);
+      this.detail = res.data.insurances;
+    });
   },
   methods: {
     // 添加乘机人
@@ -95,7 +129,18 @@ export default {
         id: ""
       });
     },
-
+    handleCheckbox(id) {
+      console.log(id);
+      // 查找该id在其中是否已经存在  ---查找数组中的元素的索引,如果存在值返回索引,不存在返回-1
+      const index = this.form.insurances.indexOf(id);
+      if (index > -1) {
+        //已经存在,删除
+        this.form.insurances.splice(index, 1);
+      } else {
+        this.form.insurances.push(id);
+      }
+      console.log(this.form.insurances);
+    },
     // 移除乘机人
     handleDeleteUser(index) {
       this.form.users.splice(index, 1);
