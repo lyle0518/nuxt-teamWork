@@ -26,6 +26,7 @@
       <!-- 侧边栏 -->
       <div class="aside">
         <!-- 侧边栏组件 -->
+        <FlightsAside />
       </div>
       <!-- 底部分页器 -->
       <!-- 数据量少,可以一次性获取后台的数据,在前端进行分页处理 -->
@@ -37,12 +38,24 @@
 import FlightsListHead from "@/components/air/flightsListHead";
 import FlightsItem from "@/components/air/flightsItem";
 import FlightsFilters from "@/components/air/flightsFilters";
+import FlightsAside from "@/components/air/flightsAside";
 
 export default {
+  beforeRouteUpdate(to, from, next) {
+    // 在当前路由改变，但是该组件被复用时调用
+    // 举例来说，对于一个带有动态参数的路径 /foo/:id，在 /foo/1 和 /foo/2 之间跳转的时候，
+    // 由于会渲染同样的 Foo 组件，因此组件实例会被复用。而这个钩子就会在这个情况下被调用。
+    // 可以访问组件实例 `this`
+    // 进入下个页面后重新触发请求机票数据
+
+    next();
+    this.getList();
+  },
   components: {
     FlightsListHead,
     FlightsItem,
-    FlightsFilters
+    FlightsFilters,
+    FlightsAside
   },
   data() {
     return {
@@ -77,22 +90,26 @@ export default {
     }
   },
   mounted() {
-    this.$axios({
-      url: "/airs",
-      params: this.$route.query
-    }).then(res => {
-      // console.log(res);
-      this.aircity = res.data;
-      // 复制一个不会修改的数组用于传值给子组件筛选
-      this.Copyaircity = { ...res.data };
-      console.log(this.aircity);
-
-      this.total = res.data.total;
-      //   请求成功后剪切出第一页5条数据
-      // this.dataList = this.aircity.flights.slice(0, this.pageSize);
-    });
+    this.getList();
   },
   methods: {
+    // 封装请求机票数据的方法
+    getList() {
+      this.$axios({
+        url: "/airs",
+        params: this.$route.query
+      }).then(res => {
+        // console.log(res);
+        this.aircity = res.data;
+        // 复制一个不会修改的数组用于传值给子组件筛选
+        this.Copyaircity = { ...res.data };
+        console.log(this.aircity);
+
+        this.total = res.data.total;
+        //   请求成功后剪切出第一页5条数据
+        // this.dataList = this.aircity.flights.slice(0, this.pageSize);
+      });
+    },
     handleSizeChange(val) {
       //   切换页面数据条数 val为 :page-sizes定义的值
       this.pageSize = val;

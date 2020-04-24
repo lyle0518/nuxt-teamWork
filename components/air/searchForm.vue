@@ -241,6 +241,8 @@ export default {
       console.log(this.form);
       this.$refs.form.validate(valid => {
         if (valid) {
+          // 将表单信息存储到store的仓库中
+          this.$store.commit("air/amendList", this.form);
           console.log(this.form);
           this.$router.push({
             path: "air/flights",
