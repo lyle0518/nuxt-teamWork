@@ -50,7 +50,7 @@ export default {
             console.log(res);
 
             this.$message.success("登录成功,欢迎回来 " + res.user.nickname);
-            this.$router.push("/");
+              this.$router.back()
           });
         } else {
           console.log("error submit!!");

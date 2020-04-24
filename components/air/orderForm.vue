@@ -66,11 +66,11 @@
       <div class="contact">
         <el-form label-width="60px">
           <el-form-item label="姓名">
-            <el-input></el-input>
+            <el-input v-model="form.contactName"></el-input>
           </el-form-item>
 
           <el-form-item label="手机">
-            <el-input placeholder="请输入内容">
+            <el-input placeholder="请输入内容" v-model="form.contactPhone">
               <template slot="append">
                 <el-button @click="handleSendCaptcha">发送验证码</el-button>
               </template>
@@ -78,7 +78,7 @@
           </el-form-item>
 
           <el-form-item label="验证码">
-            <el-input></el-input>
+            <el-input v-model="form.captcha"></el-input>
           </el-form-item>
         </el-form>
         <el-button type="warning" class="submit" @click="handleSubmit"
@@ -110,6 +110,9 @@ export default {
   mounted() {
     //获取保险信息
     const { id, seat_xid } = this.$route.query;
+    this.form.seat_xid = seat_xid;
+    this.form.air = id;
+
     this.$axios({
       url: "/airs/" + id,
       params: {
@@ -147,11 +150,32 @@ export default {
     },
 
     // 发送手机验证码
-    handleSendCaptcha() {},
+    handleSendCaptcha() {
+      //调用库里公共的方法
+      if (this.form.contactPhone) {
+        this.$store
+          .dispatch("user/sendCaptcha", this.form.contactPhone)
+          .then(code => {
+            this.$message.success("验证码发送成功，模拟的验证码是:" + code);
+          });
+      } else {
+        this.$message.error("手机号码不能为空");
+      }
+    },
 
     // 提交订单
     handleSubmit() {
       console.log(this.form);
+      this.$axios({
+        url: "/airorders",
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ` + this.$store.state.user.userInfo.token
+        },
+        data: this.form
+      }).then(res => {
+        console.log(res);
+      });
     }
   }
 };
