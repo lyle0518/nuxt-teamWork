@@ -7,12 +7,7 @@
       </div>
       <div class="pay-main">
         <h4>微信支付</h4>
-        <el-row
-          type="flex"
-          justify="space-between"
-          align="middle"
-          class="pay-qrcode"
-        >
+        <el-row type="flex" justify="space-between" align="middle" class="pay-qrcode">
           <div class="qrcode">
             <!-- 二维码 -->
             <canvas id="qrcode-stage"></canvas>
@@ -35,27 +30,54 @@ export default {
     return {
       detail: {
         price: 0
-      }
+      },
+      time: ""
     };
   },
   mounted() {
     //请求机票的信息
-    setTimeout(() => {
-      this.$axios({
+    setTimeout(async () => {
+      const res = await this.$axios({
         url: "/airorders/" + this.$route.query.id,
         headers: {
           Authorization: `Bearer ` + this.$store.state.user.userInfo.token
         }
-      }).then(res => {
-        console.log(res);
-        this.detail = res.data;
-        //获取元素
-        const canvas = document.querySelector("#qrcode-stage");
-        QRCode.toCanvas(canvas, this.detail.payInfo.code_url, {
-          width: 200
-        });
       });
+
+      console.log(res);
+      this.detail = res.data;
+      //获取元素
+      const canvas = document.querySelector("#qrcode-stage");
+      QRCode.toCanvas(canvas, this.detail.payInfo.code_url, {
+        width: 200
+      });
+      //每三秒自动询问后台接口是否支付
+      this.time = setInterval(async () => {
+        const checkRes = await this.$axios({
+          url: "/airorders/checkpay",
+          method: "post",
+          headers: {
+            Authorization: `Bearer ` + this.$store.state.user.userInfo.token
+          },
+          data: {
+            id: this.detail.id, //订单id
+            nonce_str: this.detail.price, //订单金额
+            out_trade_no: this.detail.orderNo
+          }
+        });
+        if (checkRes.data.statusTxt == "支付完成") {
+          {
+            this.$message.success("订单支付完成");
+            clearInterval(this.time);
+            this.$router.push("/air");
+          }
+        }
+      }, 3000);
     }, 0);
+  },
+  // 组件销毁时清楚定时器
+  destroyed() {
+    clearInterval(this.time);
   }
 };
 </script>

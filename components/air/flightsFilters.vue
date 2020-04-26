@@ -50,7 +50,7 @@
     </el-row>
     <div class="filter-cancel">
       筛选：
-      <el-button type="primary" round plain size="mini">撤销</el-button>
+      <el-button type="primary" round plain size="mini" @click="handleFiltersCancel">撤销</el-button>
     </div>
     <div v-show="false">{{filters}}</div>
   </div>
@@ -159,9 +159,14 @@ export default {
     //       //   将值传递给父组件
     //       this.$emit("getData", arr);
     //     },
-    //     // 撤销条件时候触发
-    //     handleFiltersCancel() {}
-    //   }
+    // 撤销条件时候触发
+    handleFiltersCancel() {
+      this.airport = "";
+      this.flightTimes = "";
+      this.company = "";
+      this.airSize = "";
+    }
+    // }
   }
 };
 </script>

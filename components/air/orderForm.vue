@@ -198,7 +198,9 @@ export default {
             this.$message.success("验证码发送成功，模拟的验证码是:" + code);
           });
       } else {
-        this.$message.error("手机号码不能为空");
+        // this.$message.error("手机号码不能为空");
+        this.$refs.form2.validateField('contactPhone')
+
       }
     },
 

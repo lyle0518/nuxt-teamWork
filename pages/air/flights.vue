@@ -9,18 +9,20 @@
 
         <!-- 航班头部布局 -->
         <FlightsListHead />
-
-        <!-- 航班信息 -->
-        <FlightsItem v-for="(item,index) in dataList" :key="index" :data="item" />
-        <el-pagination
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-          :current-page="pageIndex"
-          :page-sizes="[3, 6, 9, 12]"
-          :page-size="pageSize"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="total"
-        ></el-pagination>
+        <div v-if="aircity.flights.length">
+          <!-- 航班信息 -->
+          <FlightsItem v-for="(item,index) in dataList" :key="index" :data="item" />
+          <el-pagination
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="pageIndex"
+            :page-sizes="[3, 6, 9, 12]"
+            :page-size="pageSize"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="total"
+          ></el-pagination>
+        </div>
+        <div v-else class="empty">当前没有查询到适合的航班列表</div>
       </div>
 
       <!-- 侧边栏 -->
@@ -151,5 +153,10 @@ export default {
 }
 .el-pagination {
   text-align: center;
+}
+.empty {
+  text-align: center;
+  line-height: 200px;
+  color: #999;
 }
 </style>
