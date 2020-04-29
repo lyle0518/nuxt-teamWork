@@ -188,19 +188,21 @@
           </el-col>
           <!-- 下拉菜单 -->
           <el-col :span="24">
-            <el-dropdown @command="handleSelectLev">
-              <span class="el-dropdown-link">{{item.value}}</span>
-              <i class="el-icon-arrow-down el-icon--right"></i>
-
-              <el-dropdown-menu slot="dropdown">
+            <el-dropdown>
+              <span class="el-dropdown-link link">
+                {{item.value}}
+                <i class="el-icon-arrow-down el-icon--right"></i>
+              </span>
+              <el-dropdown-menu slot="dropdown" style="padding:10px">
                 <!-- 循环的数据 -->
-                <el-dropdown-item
-                  icon="el-icon-plus"
-                  v-for="(item1,index1) in levCommand"
+                <el-checkbox
+                  v-model="item1.checked"
+                  v-for="(item1,index1) in item.levCommand"
                   :key="index1"
-                  :command="item1"
-                  @click.native="getIndex(index)"
-                >{{item1}}</el-dropdown-item>
+                  :label="item1.label"
+                  @change="handleSelectLev(item1,index)"
+                  style="display:block;margin-bottom:10px"
+                ></el-checkbox>
               </el-dropdown-menu>
             </el-dropdown>
           </el-col>
@@ -253,16 +255,51 @@ export default {
       visible: false,
       price: 0,
       hoteltype: [
-        { label: "酒店等级", value: "不限", selectLev: [] },
-        { label: "住宿类型", value: "不限", selectLev: [] },
-        { label: "酒店设施", value: "不限", selectLev: [] },
-        { label: "酒店品牌", value: "不限", selectLev: [] }
+        {
+          label: "酒店等级",
+          value: "不限",
+          selectLev: [],
+          levCommand: [
+            { label: "1星", checked: false },
+            { label: "2星", checked: false },
+            { label: "3星", checked: false }
+          ]
+        },
+        {
+          label: "住宿类型",
+          value: "不限",
+          selectLev: [],
+          levCommand: [
+            { label: "1星", checked: false },
+            { label: "2星", checked: false },
+            { label: "3星", checked: false }
+          ]
+        },
+        {
+          label: "酒店设施",
+          value: "不限",
+          selectLev: [],
+          levCommand: [
+            { label: "1星", checked: false },
+            { label: "2星", checked: false },
+            { label: "3星", checked: false }
+          ]
+        },
+        {
+          label: "酒店品牌",
+          value: "不限",
+          selectLev: [],
+          levCommand: [
+            { label: "1星", checked: false },
+            { label: "2星", checked: false },
+            { label: "3星", checked: false }
+          ]
+        }
       ],
-      levCommand: ["1星", "2星", "3星"],
-      levIndex: 0
-      // 酒店等级
-
-      //文字酒店等级
+      levCommand: [],
+      levIndex: 0,
+      checked1: true,
+      checked2: false
     };
   },
   methods: {
@@ -283,24 +320,31 @@ export default {
       this.levIndex = index;
     },
     //选择下拉列表
-    handleSelectLev(command) {
-      setTimeout(() => {
-        if (this.hoteltype[this.levIndex].selectLev.length >= 3) {
-          return;
-        }
-        this.hoteltype[this.levIndex].selectLev.push(command);
+    handleSelectLev(item1, index) {
+      console.log(item1, index);
+      // 查找是否已有值
+      const res = this.hoteltype[index].selectLev.indexOf(item1.label);
+      if (res > -1) {
+        // 已有值
+        this.hoteltype[index].selectLev.splice(res, 1);
+      } else {
+        // 没有值-
+        this.hoteltype[index].selectLev.push(item1.label);
+      }
+      console.log(this.hoteltype[index].selectLev);
 
-        console.log(this.hoteltype);
-        if (this.hoteltype[this.levIndex].selectLev.length > 1) {
-          this.hoteltype[this.levIndex].value = `已选${
-            this.hoteltype[this.levIndex].selectLev.length
-          }项`;
-          // console.log("变");
-          return;
-        }
-
-        this.hoteltype[this.levIndex].value = command;
-      }, 0);
+      //修改不限的值
+      if (this.hoteltype[index].selectLev.length > 1) {
+        this.hoteltype[
+          index
+        ].value = `已选${this.hoteltype[index].selectLev.length}项`;
+      } else {
+        this.hoteltype[index].value = this.hoteltype[index].selectLev[0];
+      }
+      // 判断length是不是为0
+      if (this.hoteltype[index].selectLev.length === 0) {
+        this.hoteltype[index].value = "不限";
+      }
     }
   },
   mounted() {
@@ -367,6 +411,17 @@ export default {
   }
   /deep/.col-item:last-child {
     border-right: 0;
+  }
+  /deep/.el-dropdown {
+    width: 100%;
+    margin-top: 10px;
+  }
+  /deep/.el-icon--right {
+    float: right;
+  }
+  .link {
+    display: inline-block;
+    width: 100%;
   }
 }
 </style>
