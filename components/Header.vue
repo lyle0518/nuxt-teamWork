@@ -56,9 +56,7 @@
         </el-dropdown>
 
         <!-- 不存在用户信息展示登录注册链接 -->
-        <nuxt-link to="/user/login" class="account-link" v-else
-          >登录 / 注册</nuxt-link
-        >
+        <nuxt-link to="/user/login" class="account-link" v-else>登录 / 注册</nuxt-link>
       </el-row>
     </el-row>
   </header>
@@ -162,13 +160,6 @@ export default {
     &:hover {
       color: #409eff;
       text-decoration: underline;
-    }
-  }
-  /deep/.el-row {
-    box-sizing: border-box;
-    img {
-      width: 36px;
-      height: 36px;
     }
   }
 }
