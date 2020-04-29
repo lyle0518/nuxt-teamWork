@@ -50,4 +50,8 @@ em,
 i {
   font-style: normal;
 }
+input,
+button {
+	outline: none;
+}
 </style>
