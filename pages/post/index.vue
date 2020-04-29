@@ -1,9 +1,240 @@
 <template>
-  <div>攻略</div>
+	<div>
+		<el-row class="row" style="width: 1000px; margin: 0 auto; padding: 10 0;">
+			<el-col :span="7" class="left">
+				<div class="menus">
+					<div class="menu_item">
+						<span class="span1">热门城市</span>
+						<span class="el-icon-arrow-right span2"></span>
+					</div>
+					<div class="menu_item">
+						<span class="span1">推荐城市</span>
+						<span class="el-icon-arrow-right span2"></span>
+					</div>
+					<div class="menu_item">
+						<span class="span1">奔向海岛</span>
+						<span class="el-icon-arrow-right span2"></span>
+					</div>
+					<div class="menu_item">
+						<span class="span1">主题推荐</span>
+						<span class="el-icon-arrow-right span2"></span>
+					</div>
+				</div>
+				<div class="recommed">
+					<h4>推荐城市</h4>
+					<div style="padding-bottom: 10px; border-bottom: 1px solid #ddd; margin-bottom: 10px;"></div>
+					<a href="/post#"><img src="../../static/pic_sea.jpeg" /></a>
+				</div>
+			</el-col>
+			<el-col :span="17" class="right">
+				<div class="right_top">
+					<input type="text" class="input" placeholder="请输入想去的地方，比如：'广州'" v-model="city" />
+					<span class="el-icon-search span3" @click="handSearch"></span>
+				</div>
+				<div class="search-recommend">
+					<span class="span4">推荐：</span>
+					<span class="span4_1" @click="recommedCity('广州')">广州</span>
+					<span class="span4_1" @click="recommedCity('上海')">上海</span>
+					<span class="span4_1" @click="recommedCity('北京')">北京</span>
+				</div>
+				<div class="post_title">
+					<h4 class="h4">推荐攻略</h4>
+					<el-button type="primary" class="button">
+						<span class="el-icon-edit span5"></span>
+						写游记
+					</el-button>
+					<div class="line"></div>
+				</div>
+				<div v-for="(item, index) in list" :key="index">
+					<postItem1 v-if="item.images.length >= 3" :data="item"></postItem1>
+					<postItem2 v-if="item.images.length < 3 && item.images.length > 0" :data="item"></postItem2>
+					<postItem3 v-if="item.images.length === 0" :data="item"></postItem3>
+				</div>
+				<el-pagination
+					@size-change="handleSizeChange"
+					@current-change="handleCurrentChange"
+					:current-page="pageIndex"
+					:page-sizes="[3, 5, 10, 15]"
+					:page-size="pageSize"
+					layout="total, sizes, prev, pager, next, jumper"
+					:total="lists.length"
+				></el-pagination>
+			</el-col>
+		</el-row>
+	</div>
 </template>
 
 <script>
-export default {};
+import postItem1 from '@/components/post/postItem1.vue';
+import postItem2 from '@/components/post/postItem2.vue';
+import postItem3 from '@/components/post/postItem3.vue';
+export default {
+	components: {
+		postItem1,
+		postItem2,
+		postItem3
+	},
+	data() {
+		return {
+			list: [],
+			lists:[],
+			pageIndex:1,
+			pageSize:3,
+			city:''
+		}
+	},
+	mounted() {
+		this.$router.push({
+			query:{
+				start:0,
+				limit:3
+			}
+		})
+		this.request()
+	},
+	methods:{
+		request(){
+			const datas = {
+				url: '/posts',
+			}
+			if(this.city.trim() !== ''){
+				datas.params = {
+					city:this.city
+				}
+			}
+			this.$axios(datas).then(res => {
+				console.log(res);
+				const { data } = res.data;
+				this.lists = data
+				this.list = data.slice((this.pageIndex - 1 )* this.pageSize,((this.pageIndex - 1)* this.pageSize) + this.pageSize);
+				console.log(this.list);
+			});
+		},
+		recommedCity(data){
+			this.city = data
+			this.request()
+		},
+		handleSizeChange(val) {
+        this.pageSize = val
+				this.request()
+      },
+    handleCurrentChange(val) {
+        this.pageIndex = val
+				this.request()
+      },
+		handSearch(){
+				this.pageIndex = 1
+				this.pageSize = 3
+				this.request()
+			}
+			
+	}
+};
 </script>
 
-<style></style>
+<style lang="less" scoped>
+.row {
+	padding: 20px 0;
+	.left {
+		// border: 1px solid #000;
+		// height: 100px;
+		padding-right: 28px;
+		.menus {
+			width: 260px;
+			border: 1px solid #ddd;
+			border-bottom: 0;
+			.menu_item {
+				height: 40px;
+				line-height: 40px;
+				border-bottom: 1px solid #ddd;
+				display: flex;
+				justify-content: space-between;
+				padding: 0 20px;
+				align-items: center;
+				.span1 {
+					font-size: 14px;
+				}
+				.span2 {
+					font-size: 22px;
+					color: #999;
+					margin-right: -10px;
+				}
+			}
+		}
+		.recommed {
+			margin-top: 20px;
+			h4 {
+				font-weight: normal;
+			}
+			img {
+				width: 100%;
+			}
+		}
+	}
+	.right {
+		// border: 1px solid #f00;
+		// height: 100px;
+		padding-left: 10px;
+		.right_top {
+			position: relative;
+			.input {
+				width: 100%;
+				border: 3px solid orange;
+				box-sizing: border-box;
+				height: 40px;
+				padding: 0 20px;
+			}
+			.span3 {
+				position: absolute;
+				right: 15px;
+				top: 8px;
+				font-size: 24px;
+				color: orange;
+				font-weight: 700;
+			}
+		}
+		.search-recommend {
+			font-size: 12px;
+			color: #666;
+			padding: 10px 0;
+			.span4{
+				margin-right: 5px;
+			}
+			.span4_1 {
+				margin-right: 5px;
+				&:hover {
+					color: orange;
+					border-bottom: 1px solid orange;
+					cursor: pointer;
+				}
+			}
+		}
+		.post_title {
+			padding-bottom: 10px;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			border-bottom: 1px solid #eee;
+			position: relative;
+			.h4 {
+				font-weight: 400;
+				color: orange;
+				font-size: 18px;
+			}
+			.line {
+				position: absolute;
+				bottom: 0;
+				left: 0;
+				height: 2px;
+				width: 72px;
+				background: orange;
+			}
+			.button {
+				.span5 {
+					margin-right: 5px;
+				}
+			}
+		}
+	}
+}
+</style>
