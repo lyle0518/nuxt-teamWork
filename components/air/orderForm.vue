@@ -156,7 +156,7 @@ export default {
       }
     }).then(res => {
       this.detail = res.data;
-      // console.log(this.detail);
+      console.log(this.detail);
       this.$store.commit("air/setFlightData", this.detail);
     });
   },
