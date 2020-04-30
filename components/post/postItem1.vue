@@ -2,17 +2,32 @@
 		<div class="post_list">
 		<div class="list_item">
 			<h4 class="item_h4">
-				<nuxt-link to="#">
+				<nuxt-link :to="{
+					path:'/post/detail',
+					query:{
+						id:data.id
+					}
+				}">
 					{{data.title}}
 				</nuxt-link>
 			</h4>
 			<p class="p">
-				<nuxt-link to="#">
+				<nuxt-link :to="{
+					path:'/post/detail',
+					query:{
+						id:data.id
+					}
+				}">
 					{{data.summary}}
 				</nuxt-link>
 			</p>
 			<div class="img_list">
-				<nuxt-link to="#" v-for="(item,index) in data.images.slice(0,3)" :key="index">
+				<nuxt-link :to="{
+					path:'/post/detail',
+					query:{
+						id:data.id
+					}
+				}" v-for="(item,index) in data.images.slice(0,3)" :key="index">
 					<img class="img2" :src="item">
 				</nuxt-link>
 			</div>
@@ -68,6 +83,7 @@
 					-webkit-box-orient: vertical;
 					color: #666;
 					margin-bottom: 15px;
+					height: 60px;
 				}
 				.img_list{
 					display: flex;

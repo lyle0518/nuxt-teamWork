@@ -11,7 +11,7 @@
       <!-- 菜单栏 -->
       <el-row type="flex" class="navs">
         <nuxt-link to="/">首页</nuxt-link>
-        <nuxt-link to="/post">旅游攻略</nuxt-link>
+        <nuxt-link to="/post?start=0&limit=3" :class="actives?'actives':''">旅游攻略</nuxt-link>
         <nuxt-link to="/hotel">酒店</nuxt-link>
         <nuxt-link to="/air">国内机票</nuxt-link>
       </el-row>
@@ -63,13 +63,27 @@
 </template>
 <script>
 export default {
+	data(){
+		return {
+			actives:false
+		}
+	},
   methods: {
     // 用户退出
     handleLogout() {
       this.$store.commit("user/setUserInfo", {});
       this.$message.success("退出成功!");
     }
-  }
+  },
+	watch:{
+		'$route.query'(){
+				if(this.$route.query.limit){
+					this.actives = true
+				}else{
+					this.actives = false
+				}
+		}
+	}
 };
 </script>
 <style scoped lang="less">
@@ -162,5 +176,9 @@ export default {
       text-decoration: underline;
     }
   }
+}
+.actives{
+	color: #fff;
+	background: #409eff;
 }
 </style>

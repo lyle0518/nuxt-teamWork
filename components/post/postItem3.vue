@@ -2,12 +2,22 @@
 	<div class="post_list">
 		<div class="list_item">
 			<h4 class="item_h4">
-                <nuxt-link to="#">
+                <nuxt-link :to="{
+					path:'/post/detail',
+					query:{
+						id:data.id
+					}
+				}">
 					{{data.title}}
 				</nuxt-link>
             </h4>
 			<p class="p">	
-                <nuxt-link to="#">
+                <nuxt-link :to="{
+					path:'/post/detail',
+					query:{
+						id:data.id
+					}
+				}">
 					{{data.summary}}
 				</nuxt-link>
 			</p>
@@ -63,7 +73,7 @@
 				-webkit-box-orient: vertical;
 				color: #666;
 				margin-bottom: 15px;
-				height: 63px;
+				height: 60px;
 			}
 			.item_bottom{
 				display: flex;
