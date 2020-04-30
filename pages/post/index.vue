@@ -2,28 +2,23 @@
 	<div>
 		<el-row class="row" style="width: 1000px; margin: 0 auto; padding: 10 0;">
 			<el-col :span="7" class="left">
-				<div class="menus">
-					<div class="menu_item">
-						<span class="span1">热门城市</span>
-						<span class="el-icon-arrow-right span2"></span>
+				<div style="position: relative;" @mouseenter="show = true" @mouseleave="hans()" class="box">
+					<div class="menus" >
+						<div class="menu_item" :class="indexs === index?'actives':''" v-for="(item,index) in likeList" :key="index" @mouseenter="han(index)">
+							<span class="span1">{{item.type}}</span>
+							<span class="el-icon-arrow-right span2"></span>
+						</div>
 					</div>
-					<div class="menu_item">
-						<span class="span1">推荐城市</span>
-						<span class="el-icon-arrow-right span2"></span>
-					</div>
-					<div class="menu_item">
-						<span class="span1">奔向海岛</span>
-						<span class="el-icon-arrow-right span2"></span>
-					</div>
-					<div class="menu_item">
-						<span class="span1">主题推荐</span>
-						<span class="el-icon-arrow-right span2"></span>
+					<div class="active" v-if="show">
+						<ul>
+							<li v-for="(item,index) in likeList[indexss].children" :key="index"><i>{{index + 1}}</i><strong><nuxt-link to="#">{{item.city}}</nuxt-link></strong><nuxt-link to="#">{{item.desc}}</nuxt-link></li>
+						</ul>
 					</div>
 				</div>
 				<div class="recommed">
 					<h4>推荐城市</h4>
 					<div style="padding-bottom: 10px; border-bottom: 1px solid #ddd; margin-bottom: 10px;"></div>
-					<a href="/post#"><img src="../../static/pic_sea.jpeg" /></a>
+					<img src="../../static/pic_sea.jpeg"  @click="back()"/>
 				</div>
 			</el-col>
 			<el-col :span="17" class="right">
@@ -39,7 +34,7 @@
 				</div>
 				<div class="post_title">
 					<h4 class="h4">推荐攻略</h4>
-					<el-button type="primary" class="button">
+					<el-button type="primary" class="button" @click="$router.push('/post/create')">
 						<span class="el-icon-edit span5"></span>
 						写游记
 					</el-button>
@@ -58,6 +53,7 @@
 					:page-size="pageSize"
 					layout="total, sizes, prev, pager, next, jumper"
 					:total="lists.length"
+					class="el_p"
 				></el-pagination>
 			</el-col>
 		</el-row>
@@ -80,19 +76,35 @@ export default {
 			lists:[],
 			pageIndex:1,
 			pageSize:3,
-			city:''
+			city:'',
+			show:false,
+			indexs: '',
+			likeList:[],
+			indexss:0
 		}
 	},
 	mounted() {
 		this.$router.push({
+			path:'/post',
 			query:{
 				start:0,
 				limit:3
 			}
 		})
 		this.request()
+		this.$axios({
+			url:'/posts/cities'
+		}).then(res => {
+			console.log(res)
+			const {data} = res.data
+			this.likeList = data
+			})
 	},
 	methods:{
+		back(){
+			this.city = ''
+			this.request();
+		},
 		request(){
 			const datas = {
 				url: '/posts',
@@ -101,20 +113,36 @@ export default {
 				datas.params = {
 					city:this.city
 				}
+				this.$router.push({
+					query:{
+						start:(this.pageIndex - 1 )* this.pageSize,
+						limit:this.pageSize,
+						city:this.city
+					}
+				})
+			}else{
+					this.$router.push({
+						query:{
+							start:(this.pageIndex - 1 )* this.pageSize,
+							limit:this.pageSize,
+						}
+					})
 			}
 			this.$axios(datas).then(res => {
-				console.log(res);
+				// console.log(res);
 				const { data } = res.data;
 				this.lists = data
-				this.list = data.slice((this.pageIndex - 1 )* this.pageSize,((this.pageIndex - 1)* this.pageSize) + this.pageSize);
-				console.log(this.list);
+				this.list = data.slice((this.pageIndex - 1 )* this.pageSize,this.pageIndex * this.pageSize);
+				// console.log(this.list);
 			});
 		},
 		recommedCity(data){
 			this.city = data
+			this.pageIndex = 1
 			this.request()
 		},
 		handleSizeChange(val) {
+				this.pageIndex = 1
         this.pageSize = val
 				this.request()
       },
@@ -124,10 +152,26 @@ export default {
       },
 		handSearch(){
 				this.pageIndex = 1
-				this.pageSize = 3
+				this.request()
+			},
+			han(val){
+				this.indexs = val
+				this.indexss = this.indexs
+			},
+			hans(){
+				this.show = false
+				this.indexs = ''
+				this.indexss = 0
+			}
+	},
+	watch:{
+		$route(){
+			if(!this.$route.query.city){
+				this.city = ''
 				this.request()
 			}
 			
+		}
 	}
 };
 </script>
@@ -139,28 +183,75 @@ export default {
 		// border: 1px solid #000;
 		// height: 100px;
 		padding-right: 28px;
-		.menus {
-			width: 260px;
-			border: 1px solid #ddd;
-			border-bottom: 0;
-			.menu_item {
-				height: 40px;
-				line-height: 40px;
-				border-bottom: 1px solid #ddd;
-				display: flex;
-				justify-content: space-between;
-				padding: 0 20px;
-				align-items: center;
-				.span1 {
-					font-size: 14px;
+		position: relative;
+		.box{
+			.menus {
+				width: 260px;
+				border: 1px solid #ddd;
+				border-right: 0;
+				border-bottom: 0;
+				border-left: 0;
+				.menu_item {
+					height: 40px;
+					line-height: 40px;
+					border-bottom: 1px solid #ddd;
+					border-right: 1px solid #ddd;
+					border-left: 1px solid #ddd;
+					display: flex;
+					justify-content: space-between;
+					padding: 0 20px;
+					align-items: center;
+					position: relative;
+					z-index: 3;
+					.span1 {
+						font-size: 14px;
+					}
+					.span2 {
+						font-size: 22px;
+						color: #999;
+						margin-right: -10px;
+					}
 				}
-				.span2 {
-					font-size: 22px;
-					color: #999;
-					margin-right: -10px;
+				.actives{
+					color: orange;
+					border-right-color: #fff;
+				}
+			}
+			.active{
+				width: 350px;
+				position: absolute;
+				left: 259px;
+				top: 0;
+				border: 1px solid #ddd;
+				z-index: 2;
+				background: #fff;
+				padding: 10px 20px;
+				box-sizing: border-box;
+				ul{
+					li{
+						line-height: 36px;
+						color: #999;
+						font-size: 14px;
+						display: flex;
+						align-items: center;
+						i{
+							font-style: italic;
+							font-size: 24px;
+							color: orange;
+						}
+						strong{
+							font-weight: 400;
+							margin: 0 10px;
+							color: orange;
+						}
+							a:hover{
+							text-decoration: underline;
+						}
+					}
 				}
 			}
 		}
+		
 		.recommed {
 			margin-top: 20px;
 			h4 {
@@ -234,6 +325,9 @@ export default {
 					margin-right: 5px;
 				}
 			}
+		}
+		.el_p{
+			margin-top: 10px;
 		}
 	}
 }

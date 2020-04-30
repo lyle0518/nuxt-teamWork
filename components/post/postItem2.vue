@@ -2,18 +2,33 @@
 	<div class="post_list">
 		<div class="list_item">
 			<div class="item_left">
-				<nuxt-link to="#">
+				<nuxt-link :to="{
+					path:'/post/detail',
+					query:{
+						id:data.id
+					}
+				}">
 					<img style="width: 220px; height: 150px;" :src="data.images[0]">
 				</nuxt-link>
 			</div>
 			<div class="item_right">
 				<h4 class="item_h4">
-					<nuxt-link to="#">
+					<nuxt-link :to="{
+					path:'/post/detail',
+					query:{
+						id:data.id
+					}
+				}">
 						{{data.title}}
 					</nuxt-link>
 				</h4>
 				<p class="p">
-					<nuxt-link to="#">
+					<nuxt-link :to="{
+					path:'/post/detail',
+					query:{
+						id:data.id
+					}
+				}">
 						{{data.summary}}
 					</nuxt-link>
 				</p>
@@ -77,6 +92,7 @@
 					-webkit-box-orient: vertical;
 					color: #666;
 					margin-bottom: 15px;
+					height: 60px;
 				}
 				.item_bottom{
 					display: flex;
