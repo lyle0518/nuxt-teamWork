@@ -6,70 +6,8 @@
       <span>></span>
       <nuxt-link to="#">酒店预订</nuxt-link>
     </div>
-    <div class="filter">
-      <el-autocomplete
-        v-model="city"
-        :fetch-suggestions="querySearch"
-        placeholder="切换城市"
-        @select="handleSelect"
-        style="margin-right:10px"
-      ></el-autocomplete>
-
-      <el-date-picker
-        v-model="time"
-        type="daterange"
-        range-separator="至"
-        start-placeholder="开始日期"
-        end-placeholder="结束日期"
-      ></el-date-picker>
-
-      <!-- 乘坐人 -->
-      <el-popover placement="bottom" width="326" v-model="visible">
-        <div class="people" style=" border-bottom: 1px solid #ddd;padding-bottom:20px">
-          <!-- 多选 -->
-          <span style="margin-right:80px">每间</span>
-          <span class="select1">
-            <el-select v-model="value1" size="mini" style="width:93px">
-              <el-option
-                v-for="item in options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              ></el-option>
-              <!-- 定位--大人字样 -->
-            </el-select>
-          </span>
-          <span>
-            <el-select
-              v-model="value2"
-              size="mini"
-              style="margin-left: 10px;
-            width:93px"
-              class="select2"
-            >
-              <el-option
-                v-for="item in options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              ></el-option>
-            </el-select>
-          </span>
-        </div>
-        <div style="text-align: right; margin-top: 20px">
-          <el-button type="primary" size="mini" @click="visible = false">确定</el-button>
-        </div>
-        <el-input
-          style="width:200px"
-          placeholder="未定人数"
-          slot="reference"
-          suffix-icon="el-icon-user"
-          v-model="people"
-        ></el-input>
-      </el-popover>
-      <!-- 确认按钮 -->
-      <el-button type="primary">查找酒店</el-button>
-    </div>
+    <!-- 封装单独的组件  第一个筛选表单 -->
+    <HotelSeachForm />
     <!-- 地图部分 -->
     <el-row style="height:260px">
       <el-col :span="14">
@@ -161,10 +99,11 @@
       <el-col :span="10">
         <script
           type="text/javascript"
-          src="https://webapi.amap.com/maps?v=1.4.15&key=1ea10649493202a3fe81c42b68584b65&plugin=AMap.Driving"
+          src="https://webapi.amap.com/maps?v=1.4.15&key=1ea10649493202a3fe81c42b68584b65&&plugin=AMap.CitySearch"
         ></script>
         <div id="container"></div>
       </el-col>
+      <el-button type="text" @click="open"></el-button>
     </el-row>
     <!-- 筛选框 -->
     <el-row class="filter2">
@@ -209,49 +148,36 @@
         </el-col>
       </el-col>
     </el-row>
+
+    <!-- 酒店部分 -->
+    <el-row class="hotelitem">
+      <HotelItem v-for="(item,index) in $store.state.hotel.hotelList" :key="index" :data="item" />
+    </el-row>
   </div>
 </template>
 
 <script>
+import HotelItem from "@/components/hotel/hotelItem";
+import HotelSeachForm from "@/components/hotel/hotelSeachForm";
+
 export default {
+  beforeRouteUpdate(to, from, next) {
+    console.log("触发");
+    next();
+    //  重新请求酒店数据
+    this.getList();
+  },
+  components: {
+    HotelItem,
+    HotelSeachForm
+  },
   data() {
     return {
-      options: [
-        {
-          value: "1",
-          label: "1"
-        },
-        {
-          value: "2",
-          label: "2"
-        },
-        {
-          value: "3",
-          label: "3"
-        },
-        {
-          value: "4",
-          label: "4"
-        },
-        {
-          value: "5",
-          label: "5"
-        },
-        {
-          value: "6",
-          label: "6"
-        },
-        {
-          value: "7",
-          label: "7"
-        }
-      ],
       value1: "",
       value2: "",
       time: "",
       // 人数
       people: "",
-      city: "",
       visible: false,
       price: 0,
       hoteltype: [
@@ -299,19 +225,27 @@ export default {
       levCommand: [],
       levIndex: 0,
       checked1: true,
-      checked2: false
+      checked2: false,
+      // 弹出框文本
+      mapCity: "上海市"
     };
   },
+  destroyed() {
+    this.getList();
+  },
   methods: {
-    querySearch(value, cb) {
-      if (!value) {
-        cb([]);
-        return;
-      }
-      cb([{ value: "1" }, { value: "2" }, { value: "3" }]);
-    },
-    handleSelect(item) {
-      // console.log(item);
+    //子组件传递form参数给父组件请求酒店数据
+    //data为form表单数据
+    getList() {
+      this.$axios({
+        url: "/hotels",
+        params: this.$store.state.hotel.hotelForm
+      }).then(res => {
+        console.log(res);
+        const { data } = res.data;
+        // 存进公共仓库
+        this.$store.commit("hotel/setHotelList", data);
+      });
     },
     //获取下拉框的index
     getIndex(index) {
@@ -345,22 +279,82 @@ export default {
       if (this.hoteltype[index].selectLev.length === 0) {
         this.hoteltype[index].value = "不限";
       }
+    },
+
+    //弹出框
+    open() {
+      this.$alert(`定位当前城市:${this.mapCity}`, "提示", {
+        confirmButtonText: "确定",
+        callback: action => {
+          // console.log(111);
+          // 点击确认的时候用这个城市名请求城市信息
+          this.$axios({
+            url: "/cities",
+            params: {
+              name: this.mapCity
+            }
+          }).then(res => {
+            console.log(res);
+            const { data } = res.data;
+            data.forEach(v => {
+              if (v.name === this.mapCity) {
+                console.log(v.id);
+                this.$store.commit("hotel/setHotelFormCity", v.id);
+                this.getList();
+              }
+            });
+          });
+          //跳转到cityname
+          this.$router.push({
+            path: "/hotel",
+            query: {
+              cityName: this.mapCity
+            }
+          });
+        }
+      });
+    },
+    // 画图
+    getMap() {
+      var map = new AMap.Map("container", {
+        zoom: 11, //级别
+        center: [116.397428, 39.90923], //中心点坐标
+        viewMode: "3D", //使用3D视图
+        resizeEnable: true
+      });
+      //点标记
+      // 根据酒店的数量生成对应的标记标到地图上
+      var marker = new AMap.Marker({
+        position: new AMap.LngLat(113.3245904, 23.1066805), // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
+        title: "广州塔"
+      });
+      map.add(marker);
+      //获取当前定位的城市用于显示
+      // 获取当前连接是否有query参数cityName值,如果为true,则执行定位
+      if (this.$route.query.cityName) return;
+      var citysearch = new AMap.CitySearch();
+      citysearch.getLocalCity((status, result) => {
+        if (status === "complete" && result.info === "OK") {
+          if (result && result.city && result.bounds) {
+            var cityinfo = result.city;
+            var citybounds = result.bounds;
+            //弹出框
+            // cityinfo --当前城市
+            this.mapCity = cityinfo;
+            this.open();
+          }
+        }
+      });
     }
   },
   mounted() {
-    var map = new AMap.Map("container");
-    var map = new AMap.Map("container", {
-      zoom: 11, //级别
-      center: [113.3245904, 23.1066805], //中心点坐标
-      viewMode: "3D" //使用3D视图
-    });
-    //点标记
-    // 根据酒店的数量生成对应的标记标到地图上
-    var marker = new AMap.Marker({
-      position: new AMap.LngLat(113.3245904, 23.1066805), // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
-      title: "北京"
-    });
-    map.add(marker);
+    // this.open();
+    // 判断cityname是否有值
+    this.getMap();
+    setTimeout(() => {
+      // 请求酒店的数据
+      this.getList();
+    }, 0);
   }
 };
 </script>
@@ -377,9 +371,7 @@ export default {
       margin: 0 10px;
     }
   }
-  .filter {
-    margin-bottom: 30px;
-  }
+
   /deep/.el-row {
     font-size: 14px;
     a {
@@ -423,5 +415,8 @@ export default {
     display: inline-block;
     width: 100%;
   }
+}
+/deep/.el-checkbox__inner {
+  border-radius: 50%;
 }
 </style>
