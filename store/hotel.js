@@ -1,6 +1,6 @@
 export const state = function() {
   return {
-    hotelList: [],
+    hotelList: [{}],
     hotelForm: {
       //切换城市
       city: "",
