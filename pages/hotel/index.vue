@@ -338,7 +338,6 @@ export default {
       person: 1,
       // 城市的id-请求参数
       city: "",
-
       //时间
       time: "",
       //时期禁用
@@ -409,7 +408,7 @@ export default {
       // 人数
       people: "",
       visible: false,
-      price: 0,
+      price: 4000,
       //分割线--------------
       //酒店选项
       levels: [], //等级
@@ -635,10 +634,32 @@ export default {
         this.leveValue = "不限";
       }
       //筛选功能
-      跳转页面;
+      //触发的时候拼接路劲
+      console.log(this.$axios);
+      let url = `price_lt=${this.price}`;
+      for (let key in this.form) {
+        if (this.form[key]) {
+          url += `&${key}=${this.form[key]}`;
+        }
+      }
+
+      // 循环这个leveList这个数组,追加对应的参数
       this.leveList.forEach(v => {
-        // v值:'1星'
+        // v=1星
+        this.levels.forEach(item1 => {
+          if (v === item1.name) {
+            url += `&hotellevel=${item1.level}`;
+          }
+        });
       });
+
+      console.log(url);
+
+      // 跳转页面;触发路由守卫,重新请求getList,传递form的参数,更改cityName的值
+      // this.$route.push({
+      //   path: "/hotel",
+      //   query: this.form
+      // });
     },
     //酒店住宿类型筛选
     handleTypes(item, index) {
