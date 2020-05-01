@@ -321,6 +321,13 @@ export default {
       peopleNum: "",
 
       //分割线---
+      // 画图的参数
+      //纬度
+      latitude: 0,
+      //经度
+      longitude: 0,
+
+      //分割线---
       value1: "",
       value2: "",
       time: "",
@@ -412,6 +419,7 @@ export default {
       const { cityName, ...other } = this.form;
       other.city = this.city;
       this.$store.commit("hotel/setHotelForm", other);
+      this.getList();
       this.$router.push({
         path: "/hotel",
         query: {
@@ -454,8 +462,15 @@ export default {
         params: this.$store.state.hotel.hotelForm
       }).then(res => {
         const { data } = res.data;
+        // this.latitude = Number(data[0].location.latitude);
+        // this.longitude = Number(data[0].location.longitude);
+        console.log(this.latitude, this.longitude);
+
+        // this.centerLocation = data[0].location;
         // 存进公共仓库
         this.$store.commit("hotel/setHotelList", data);
+        // 重新画图
+        this.getMap();
       });
     },
     //获取下拉框的index
@@ -496,6 +511,8 @@ export default {
         callback: action => {
           // console.log(111);
           // 点击确认的时候用这个城市名请求城市信息
+          console.log(this.mapcity);
+
           this.$axios({
             url: "/cities",
             params: {
@@ -503,6 +520,8 @@ export default {
             }
           }).then(res => {
             const { data } = res.data;
+            console.log(res);
+
             data.forEach(v => {
               if (v.name === this.mapCity) {
                 // 备份一份当前的id用作使用
@@ -524,19 +543,34 @@ export default {
     },
     // 画图
     getMap() {
+      // 随机获取一个酒店的地点作为地图的中心点
+      const { location } = this.$store.state.hotel.hotelList[0];
+      this.latitude = location.latitude;
+      this.longitude = location.longitude;
       var map = new AMap.Map("container", {
         zoom: 11, //级别
-        center: [116.397428, 39.90923], //中心点坐标
+        center: [this.longitude, this.latitude], //中心点坐标
         viewMode: "3D", //使用3D视图
         resizeEnable: true
       });
-      //点标记
-      // 根据酒店的数量生成对应的标记标到地图上
-      var marker = new AMap.Marker({
-        position: new AMap.LngLat(113.3245904, 23.1066805), // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
-        title: "广州塔"
+      //点标记 --从仓库循环
+      this.$store.state.hotel.hotelList.forEach((item, index) => {
+        const hotelLatitude = item.location.latitude;
+        const hotelLongitude = item.location.longitude;
+
+        var marker = new AMap.Marker({
+          position: new AMap.LngLat(hotelLongitude, hotelLatitude), // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
+          title: `${item.name}`
+        });
+        map.add(marker);
       });
-      map.add(marker);
+
+      // 根据酒店的数量生成对应的标记标到地图上
+      // var marker = new AMap.Marker({
+      //   // position: new AMap.LngLat(113.3245904, 23.1066805), // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
+      //   // title: "广州塔"
+      // });
+      // map.add(marker);
       //获取当前定位的城市用于显示
       // 获取当前连接是否有query参数cityName值,如果为true,则执行定位
       if (this.$route.query.cityName) return;
@@ -561,10 +595,12 @@ export default {
     if (this.$route.query.cityName && this.form.cityName === "") {
       this.form.cityName = this.$route.query.cityName;
     }
-    this.getMap();
+
+    // this.getList();
+
     setTimeout(() => {
       // 请求酒店的数据
-      this.getList();
+      this.getMap();
     }, 0);
   }
 };
@@ -630,4 +666,5 @@ export default {
 /deep/.el-checkbox__inner {
   border-radius: 50%;
 }
+//标记的样式
 </style>
