@@ -91,19 +91,9 @@
         <div class="left">
           <el-row style="margin-bottom:20px">
             <el-col :span="3">区域:</el-col>
-            <el-col :span="21">
+            <el-col :span="21" class="area">
               <!-- 需要循环处理的数据 -->
-              <a href="#">人民广场</a>
-              <a href="#">人民广场</a>
-              <a href="#">人民广场</a>
-              <a href="#">人民广场</a>
-              <a href="#">人民广场</a>
-              <a href="#">人民广场</a>
-              <a href="#">人民广场</a>
-              <a href="#">人民广场</a>
-              <a href="#">人民广场</a>
-              <a href="#">人民广场</a>
-              <a href="#">人民广场</a>
+              <a href="#" v-for="(item,index) in $store.state.hotel.area" :key="index">{{item.name}}</a>
             </el-col>
           </el-row>
           <el-row>
@@ -204,7 +194,7 @@
           </el-col>
           <!-- 下拉菜单 -->
           <el-col :span="24">
-            <el-dropdown>
+            <el-dropdown placement="bottom-start">
               <span class="el-dropdown-link link">
                 {{item.value}}
                 <i class="el-icon-arrow-down el-icon--right"></i>
@@ -326,6 +316,10 @@ export default {
       latitude: 0,
       //经度
       longitude: 0,
+      //左侧区域列表
+      area: [],
+      // 下拉框的所有值
+      cityList: [],
 
       //分割线---
       value1: "",
@@ -335,6 +329,14 @@ export default {
       people: "",
       visible: false,
       price: 0,
+      //分割线--------------
+      //酒店选项
+      levels: [], //等级
+      types: [], //住宿类型
+      assets: [], //酒店设施
+      bands: [], //酒店品牌
+      //分割线--------------
+
       hoteltype: [
         {
           label: "酒店等级",
@@ -402,16 +404,22 @@ export default {
         }
       }).then(res => {
         const { data } = res.data;
+        console.log(data);
+
         const list = data.map(v => {
           v.value = v.name;
           return v;
         });
-
+        this.cityList = list;
         cb(list);
       });
     },
     //城市下拉触发
     handleSelect(item) {
+      console.log(item);
+      this.area = item.scenics;
+      // 存进仓库缓存
+      this.$store.commit("hotel/setArea", this.area);
       this.form.cityName = item.name;
       this.city = item.id;
       // 传递当前form给仓库
@@ -461,7 +469,10 @@ export default {
         url: "/hotels",
         params: this.$store.state.hotel.hotelForm
       }).then(res => {
+        console.log(res);
+
         const { data } = res.data;
+
         // this.latitude = Number(data[0].location.latitude);
         // this.longitude = Number(data[0].location.longitude);
         console.log(this.latitude, this.longitude);
@@ -471,6 +482,19 @@ export default {
         this.$store.commit("hotel/setHotelList", data);
         // 重新画图
         this.getMap();
+      });
+    },
+    // 请求酒店选项
+    getOption() {
+      this.$axios({
+        url: "/hotels/options"
+      }).then(res => {
+        console.log(res);
+        const { levels, types, assets, brands } = res.data;
+        this.levels = levels;
+        this.types = types;
+        this.assets = assets;
+        this.brands = brands;
       });
     },
     //获取下拉框的index
@@ -520,8 +544,8 @@ export default {
             }
           }).then(res => {
             const { data } = res.data;
-            console.log(res);
-
+            console.log(data);
+            this.area = data.scenics;
             data.forEach(v => {
               if (v.name === this.mapCity) {
                 // 备份一份当前的id用作使用
@@ -595,7 +619,8 @@ export default {
     if (this.$route.query.cityName && this.form.cityName === "") {
       this.form.cityName = this.$route.query.cityName;
     }
-
+    // 请求酒店选项
+    this.getOption();
     // this.getList();
 
     setTimeout(() => {
@@ -628,6 +653,17 @@ export default {
 }
 /deep/.start {
   margin-right: 20px;
+}
+//区域样式
+.area {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  width: 80%;
+  a {
+    display: inline-block;
+  }
 }
 // 地图样式
 #container {
@@ -666,5 +702,12 @@ export default {
 /deep/.el-checkbox__inner {
   border-radius: 50%;
 }
+
+.el-dropdown-menu {
+  max-height: 200px !important;
+  overflow: auto;
+  width: 135px !important;
+}
+
 //标记的样式
 </style>
