@@ -28,7 +28,7 @@
 						<span>{{data.cityName}}</span>
 					</div>
 					<span class="span6">by</span>
-					<nuxt-link to="#"><img :src="'http://127.0.0.1:1337' + data.account.defaultAvatar" class="img3"></nuxt-link>
+					<nuxt-link to="#"><img :src="$axios.defaults.baseURL + data.account.defaultAvatar" class="img3"></nuxt-link>
 					<nuxt-link to="#" class="span6" style="color: #FFA500;">{{data.account.nickname}}</nuxt-link>
 					<div class="span6">
 						<span class="el-icon-view"></span>

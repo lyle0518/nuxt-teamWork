@@ -77,7 +77,7 @@ export default {
   },
 	watch:{
 		'$route.query'(){
-				if(this.$route.query.limit || this.$route.query.id){
+				if(this.$route.query.limit || this.$route.query.id || this.$route.path === '/post/create'){
 					this.actives = true
 				}else{
 					this.actives = false
@@ -180,5 +180,8 @@ export default {
 .actives{
 	color: #fff;
 	background: #409eff;
+	 &:hover{
+		 color: #fff!important;
+	 }
 }
 </style>
