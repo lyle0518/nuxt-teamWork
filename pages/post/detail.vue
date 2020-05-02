@@ -4,7 +4,7 @@
       <!-- 左内容 -->
       <el-col :span="16">
         <div class="grid-content bg-purple">
-          <!-- 面包屑 -->
+          <!-- 面包屑导航 -->
           <el-breadcrumb separator="/">
             <el-breadcrumb-item :to="{ path:'/post' }">旅游攻略</el-breadcrumb-item>
             <el-breadcrumb-item>攻略详情</el-breadcrumb-item>
@@ -22,7 +22,7 @@
           <div class="share">
             <div class="share-item">
               <i class="iconfont iconpinglun-"></i>
-              <p>评论(0)</p>
+              <p>评论({{postCommentsData.length}})</p>
             </div>
             <div class="share-item">
               <i class="iconfont iconfenxiang"></i>
@@ -36,19 +36,23 @@
             <div class="form">
               <textarea
                 style="resize:none;width:100%;min-height:60px;border-raidus:10px;border:1px #dcdfe6 solid;border-radius:5px;"
+                placeholder="说点什么..."
               ></textarea>
               <div class="btn clearfix">
                 <div class="left">
                   <el-upload
                     class="avatar-uploader"
-                    action="https://jsonplaceholder.typicode.com/posts/"
-                    :show-file-list="false"
-                    :on-success="handleAvatarSuccess"
-                    :before-upload="beforeAvatarUpload"
+                    :action="$axios.defaults.baseURL + '/upload'"
+                    name="files"
+                    list-type="picture-card"
+                    :on-preview="handlePictureCardPreview"
+                    :on-remove="handleRemove"
                   >
-                    <img v-if="imageUrl" :src="imageUrl" class="avatar" />
-                    <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                    <i class="el-icon-plus"></i>
                   </el-upload>
+                  <el-dialog :visible.sync="dialogVisible">
+                    <img width="100%" :src="dialogImageUrl" alt />
+                  </el-dialog>
                 </div>
                 <div class="right">
                   <el-button type="primary">提交</el-button>
@@ -59,53 +63,50 @@
 
           <!-- 评论区 -->
           <div class="comment_content">
-            <div v-if="true" class="comment_items">
+            <div v-if="postCommentsData.length > 0" class="comment_items">
               <!-- 评论 -->
-              <div class="com">
+              <div class="com" v-for="(item,index) in postCommentsData" :key="index">
                 <div class="user">
-                  <img src="#" alt class="avatar" />
-                  <span class="username">管理员</span>
-                  <span class="date">2020-04-25 10:18</span>
+                  <img
+                    :src="$axios.defaults.baseURL +  item.account.defaultAvatar"
+                    alt
+                    class="avatar"
+                  />
+                  <span class="username">{{item.account.nickname}}</span>
+                  <span class="date">2020年4月30日19:39:33</span>
                 </div>
-
-                <p class="txt">评论评论评论评论评论</p>
-              </div>
-              <!-- 回复 -->
-              <div class="reply">
-                <div>
-                  <div class="user">
-                    <span class="username">管理员</span>
-                    <span class="date">2020-04-25 10:18</span>
-                  </div>
-                  <p class="txt">回复回复回复回复回复回复</p>
+                <div class="reply">
+                  <!-- 回复组件 -->
+                  <DetailComItem v-if="item.parent" :data="item.parent" />
                 </div>
+                <p class="txt">{{item.content}}</p>
               </div>
             </div>
-            <div v-else class="zeroComment">暂无评论,赶紧抢占沙发！</div>
+            <div
+              v-if="postCommentsData.length == 0 || postCommentsData.length <0 "
+              class="zeroComment"
+            >暂无评论,赶紧抢占沙发！</div>
           </div>
         </div>
       </el-col>
+
+      <!-- 右 相关攻略-->
       <el-col :span="8">
-        <!-- 右 相关攻略-->
         <div class="grid-content bg-purple">
           <h4
             style="font-size:18px;font-weight:400;padding-bottom:10px;border-bottom: 1px #ccc solid;"
           >相关攻略</h4>
-          <!-- 有图 -->
-          <nuxt-link
-            class="strategy clearfix"
-            v-for="(item,index) in postRecommend"
-            :key="index"
-            to="#"
-          >
-            <div class="left" v-if="item.images.length > 0">
-              <img :src="item.images[0]" alt />
-            </div>
-            <div class="right">
-              <h4>{{item.title}}</h4>
-              <div class="strategyText">攻略：{{item.created_at}} 阅读：{{item.watch}}</div>
-            </div>
-          </nuxt-link>
+          <div v-for="(item,index) in postRecommend" :key="index">
+            <nuxt-link class="strategy clearfix" :to="`/post/detail?id=${item.id}`">
+              <div class="left" v-if="item.images.length > 0">
+                <img :src="item.images[0]" alt />
+              </div>
+              <div class="right">
+                <h4>{{item.title}}</h4>
+                <div class="strategyText">攻略：{{item.created_at}} 阅读：{{item.watch}}</div>
+              </div>
+            </nuxt-link>
+          </div>
         </div>
       </el-col>
     </el-row>
@@ -113,27 +114,21 @@
 </template>
 
 <script>
+//时间 组件
 import moment from "moment";
+//评论 组件
+import DetailComItem from "@/components/post/detailComItem.vue";
 
 export default {
+  watch: {
+    $route() {
+      //页面地址栏变化时重新请求数据
+      this.getPostData();
+    }
+  },
   mounted() {
-    const { id } = this.$route.query;
-
-    //文章详情
-    this.$axios({
-      url: "/posts",
-      params: {
-        id
-      }
-    }).then(res => {
-      const { data } = res.data;
-      this.detail = { ...data[0] };
-      //   console.log(this.detail);
-      let createDate = moment(this.detail.created_at).format(
-        "YYYY-MM-DD hh:mm"
-      );
-      this.createDate = createDate;
-    });
+    this.getPostData();
+    this.getCommentsData();
     //推荐文章
     this.$axios({
       url: "/posts/recommend"
@@ -147,33 +142,76 @@ export default {
       this.postRecommend = postRecommend;
     });
   },
+
   data() {
     return {
-      imageUrl: "",
+      post: "", //  文章ID
       detail: {}, // 文章详情 数据
-      createDate: "",
-      postRecommend: {}
+      createDate: "", // 文章详情 时间
+      postRecommend: {}, //侧栏 推荐文章 数据
+      postCommentsData: [], //文章 评论、回复 数据
+      //图片上传缩略图
+      dialogVisible: false,
+      dialogImageUrl: "",
+
+      //文章评论
+      _limit: 5, //评论条数
+      _start: 0 //开始数据
     };
   },
   methods: {
-    handleAvatarSuccess(res, file) {
-      this.imageUrl = URL.createObjectURL(file.raw);
+    //图片上传成功时
+    handlePictureCardPreview(file) {
+      console.log(file);
+      this.dialogImageUrl = file.url;
+      this.dialogVisible = true;
     },
-    beforeAvatarUpload(file) {
-      const isJPG = file.type === "image/jpeg";
-      const isLt2M = file.size / 1024 / 1024 < 2;
+    handleRemove(file, fileList) {
+      console.log(file);
+    },
 
-      if (!isJPG) {
-        this.$message.error("上传头像图片只能是 JPG 格式!");
-      }
-      if (!isLt2M) {
-        this.$message.error("上传头像图片大小不能超过 2MB!");
-      }
-      return isJPG && isLt2M;
+    //文章详情请求
+    getPostData() {
+      const { id } = this.$route.query;
+      this.post = id;
+
+      //文章详情
+      this.$axios({
+        url: "/posts",
+        params: {
+          id
+        }
+      }).then(res => {
+        const { data } = res.data;
+        this.detail = { ...data[0] };
+        //   console.log(this.detail);
+        let createDate = moment(this.detail.created_at).format(
+          "YYYY-MM-DD hh:mm"
+        );
+        this.createDate = createDate;
+      });
+    },
+
+    //文章评论请求
+    getCommentsData() {
+      //评论数据请求
+      this.$axios({
+        url: "/posts/comments",
+        params: {
+          post: this.post,
+          _start: 0,
+          _limit: 5
+        }
+      }).then(res => {
+        const { data } = res.data;
+        this.postCommentsData = data;
+        console.log(this.postCommentsData);
+      });
     }
   },
   components: {
-    moment
+    moment,
+    DetailComItem
   }
 };
 </script>
@@ -248,18 +286,22 @@ export default {
           /deep/.avatar-uploader .el-upload:hover {
             border-color: #409eff;
           }
-          /deep/.avatar-uploader-icon {
+          /deep/.el-upload-list__item-actions {
+            width: 100px;
+            height: 100px;
+          }
+          /deep/.el-upload-list--picture-card .el-upload-list__item {
+            width: 100px;
+            height: 100px;
+          }
+          /deep/.el-upload--picture-card {
             font-size: 28px;
             color: #8c939d;
             width: 100px;
             height: 100px;
             line-height: 100px;
             text-align: center;
-          }
-          /deep/.avatar {
-            width: 100px;
-            height: 100px;
-            display: block;
+            // vertical-align: top;
           }
         }
         .right {
@@ -272,47 +314,9 @@ export default {
       }
     }
 
-    //评论区
-    .comment_content {
-      border: 1px #ddd solid;
-      .comment_items {
-        padding: 0 20px;
-        margin: 10px 0;
-        border-bottom: 1px #ddd dashed;
-        .com {
-          font-size: 12px;
-          .user {
-            padding: 10px 0;
-          }
-          .date {
-            color: #ccc;
-          }
-        }
-        .reply {
-          padding: 10px;
-          font-size: 12px;
-          background: #f9f9f9;
-          border: 1px #ccc solid;
-          .date {
-            color: #ccc;
-          }
-        }
-        .txt {
-          padding: 15px 0;
-          margin-left: 20px;
-          font-size: 16px;
-        }
-      }
-      .zeroComment {
-        line-height: 100px;
-        color: #ccc;
-        text-align: center;
-        border: 1px #ccc dashed;
-      }
-    }
-
     //侧栏攻略
     .strategy {
+      position: relative;
       border-bottom: 1px #ccc solid;
       padding: 20px 0;
       display: flex;
@@ -323,16 +327,62 @@ export default {
         }
       }
       .right {
-        // padding-left: 10px;
         h4 {
+          position: absolute;
+          top: 20px;
           font-size: 14px;
           font-weight: 400;
         }
         .strategyText {
+          position: absolute;
+          bottom: 20px;
           font-size: 12px;
           color: #ccc;
-          line-height: 40px;
         }
+      }
+    }
+
+    .comment_content {
+      border: 1px #ddd solid;
+      .comment_items {
+        padding: 0 15px;
+        margin: 10px 0;
+        .avatar {
+          width: 13px;
+          height: 13px;
+        }
+        .com {
+          font-size: 14px;
+          border-bottom: 1px #ccc dashed;
+          .user {
+            padding: 10px 0;
+          }
+          .date {
+            color: #ccc;
+          }
+          .txt {
+            padding: 8px 0;
+            margin-left: 20px;
+            font-size: 16px;
+          }
+        }
+        // .reply {
+        //   .reply-item {
+        //     padding: 4px;
+        //     font-size: 12px;
+        //     background: #f9f9f9;
+        //     border: 1px #ccc solid;
+        //   }
+        //   .date {
+        //     color: #ccc;
+        //   }
+        // }
+      }
+      .zeroComment {
+        line-height: 100px;
+        color: #ccc;
+        text-align: center;
+        border: 1px #ccc dashed;
       }
     }
   }
