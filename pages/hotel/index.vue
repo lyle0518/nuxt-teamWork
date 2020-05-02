@@ -1,5 +1,9 @@
 <template>
   <div class="hotel">
+    <script
+      type="text/javascript"
+      src="https://webapi.amap.com/maps?v=1.4.15&key=1ea10649493202a3fe81c42b68584b65&&plugin=AMap.CitySearch"
+    ></script>
     <div class="title">
       <!-- 修改:要用图标分隔符 -->
       <nuxt-link to="#">酒店</nuxt-link>
@@ -40,7 +44,7 @@
               <span class="select1">
                 <el-select v-model="value1" size="mini" style="width:93px">
                   <el-option
-                    v-for="(item,index) in options"
+                    v-for="(item, index) in options"
                     :key="index"
                     :label="item.label"
                     :value="item.value"
@@ -57,7 +61,7 @@
                   class="select2"
                 >
                   <el-option
-                    v-for="(item,index) in options"
+                    v-for="(item, index) in options"
                     :key="index"
                     :label="item.label"
                     :value="item.value"
@@ -93,7 +97,11 @@
             <el-col :span="3">区域:</el-col>
             <el-col :span="21" class="area">
               <!-- 需要循环处理的数据 -->
-              <a href="#" v-for="(item,index) in $store.state.hotel.area" :key="index">{{item.name}}</a>
+              <a
+                href="#"
+                v-for="(item, index) in $store.state.hotel.area"
+                :key="index"
+              >{{ item.name }}</a>
             </el-col>
           </el-row>
           <el-row>
@@ -119,7 +127,7 @@
                   <i
                     class="el-icon-star-off icon"
                     style="color:#f90;vertical-align:top"
-                    v-for="(index) in [1,2,3]"
+                    v-for="index in [1, 2, 3]"
                     :key="index"
                   ></i>
                   ￥200
@@ -135,7 +143,7 @@
                   <i
                     class="el-icon-star-off icon"
                     style="color:#f90;vertical-align:top"
-                    v-for="(index) in [1,2,3,4]"
+                    v-for="index in [1, 2, 3, 4]"
                     :key="index"
                   ></i>
                   ￥400
@@ -151,7 +159,7 @@
                   <i
                     class="el-icon-star-off icon"
                     style="color:#f90;vertical-align:top"
-                    v-for="(index) in [1,2,3,4,5]"
+                    v-for="index in [1, 2, 3, 4, 5]"
                     :key="index"
                   ></i>
                   ￥600
@@ -164,10 +172,6 @@
       <!-- 地图
       -->
       <el-col :span="10">
-        <script
-          type="text/javascript"
-          src="https://webapi.amap.com/maps?v=1.4.15&key=1ea10649493202a3fe81c42b68584b65&&plugin=AMap.CitySearch"
-        ></script>
         <div id="container"></div>
       </el-col>
       <el-button type="text" @click="open"></el-button>
@@ -178,7 +182,7 @@
         <el-col :span="24" class="col-item-first">
           <span>价格</span>
           <!-- 双向数据绑定 -->
-          <span style="float:right">0-{{price}}</span>
+          <span style="float:right">0-{{ price }}</span>
         </el-col>
         <el-col :span="24" class="col-item-first">
           <el-slider v-model="price" :max="4000"></el-slider>
@@ -197,17 +201,17 @@
           <el-col :span="24">
             <el-dropdown placement="bottom-start">
               <span class="el-dropdown-link link">
-                {{leveValue}}
+                {{ leveValue }}
                 <i class="el-icon-arrow-down el-icon--right"></i>
               </span>
               <el-dropdown-menu slot="dropdown" style="padding:10px">
                 <!-- 循环的数据 -->
                 <el-checkbox
-                  v-for="(item,index) in levels"
+                  v-for="(item, index) in levels"
                   v-model="item.checked"
                   :key="index"
                   :label="item.name"
-                  @change="handleLeves(item,index)"
+                  @change="handleLeves(item, index)"
                   style="display:block;margin-bottom:10px"
                 ></el-checkbox>
               </el-dropdown-menu>
@@ -224,17 +228,17 @@
           <el-col :span="24">
             <el-dropdown placement="bottom-start">
               <span class="el-dropdown-link link">
-                {{typeValue}}
+                {{ typeValue }}
                 <i class="el-icon-arrow-down el-icon--right"></i>
               </span>
               <el-dropdown-menu slot="dropdown" style="padding:10px">
                 <!-- 循环的数据 -->
                 <el-checkbox
-                  v-for="(item,index) in types"
+                  v-for="(item, index) in types"
                   v-model="item.checked"
                   :key="index"
                   :label="item.name"
-                  @change="handleTypes(item,index)"
+                  @change="handleTypes(item, index)"
                   style="display:block;margin-bottom:10px"
                 ></el-checkbox>
               </el-dropdown-menu>
@@ -251,17 +255,17 @@
           <el-col :span="24">
             <el-dropdown placement="bottom-start">
               <span class="el-dropdown-link link">
-                {{assetsValue}}
+                {{ assetsValue }}
                 <i class="el-icon-arrow-down el-icon--right"></i>
               </span>
               <el-dropdown-menu slot="dropdown" style="padding:10px">
                 <!-- 循环的数据 -->
                 <el-checkbox
-                  v-for="(item,index) in assets"
+                  v-for="(item, index) in assets"
                   v-model="item.checked"
                   :key="index"
                   :label="item.name"
-                  @change="handleAssets(item,index)"
+                  @change="handleAssets(item, index)"
                   style="display:block;margin-bottom:10px"
                 ></el-checkbox>
               </el-dropdown-menu>
@@ -277,17 +281,17 @@
           <el-col :span="24">
             <el-dropdown placement="bottom-start">
               <span class="el-dropdown-link link">
-                {{brandsValue}}
+                {{ brandsValue }}
                 <i class="el-icon-arrow-down el-icon--right"></i>
               </span>
               <el-dropdown-menu slot="dropdown" style="padding:10px">
                 <!-- 循环的数据 -->
                 <el-checkbox
-                  v-for="(item,index) in brands"
+                  v-for="(item, index) in brands"
                   v-model="item.checked"
                   :key="index"
                   :label="item.name"
-                  @change="handleBrands(item,index)"
+                  @change="handleBrands(item, index)"
                   style="display:block;margin-bottom:10px"
                 ></el-checkbox>
               </el-dropdown-menu>
@@ -298,8 +302,8 @@
     </el-row>
 
     <!-- 酒店部分 -->
-    <el-row class="hotelitem" v-if="$store.state.hotel.hotelList.length>1">
-      <HotelItem v-for="(item,index) in $store.state.hotel.hotelList" :key="index" :data="item" />
+    <el-row class="hotelitem" v-if="$store.state.hotel.hotelList.length > 0">
+      <HotelItem v-for="(item, index) in $store.state.hotel.hotelList" :key="index" :data="item" />
     </el-row>
     <el-row class="none" v-else>
       <p>暂无符合条件的酒店</p>
@@ -317,7 +321,14 @@ export default {
     this.form.cityName = this.$route.query.cityName;
     // this.$store.commit("hotel/setHotelForm", );
     // 修改query里面的cityName的值
-    const { cityName, hotellevel, ...other } = this.$route.query;
+    const {
+      cityName,
+      hotellevel,
+      hoteltype,
+      hotelasset,
+      hotelbrand,
+      ...other
+    } = this.$route.query;
     // 追加城市信息获取id
     await this.$axios({
       url: "/cities",
@@ -335,6 +346,9 @@ export default {
       });
       // 处理hotellevel
       other.hotellevel_in = hotellevel;
+      other.hoteltype_in = hoteltype;
+      other.hotelasset_in = hotelasset;
+      other.hotelbrand_in = hotelbrand;
     });
     const qs = require("qs");
 
@@ -529,7 +543,14 @@ export default {
       checked1: true,
       checked2: false,
       // 弹出框文本
-      mapCity: "上海市"
+      mapCity: "上海市",
+      pushUrl: {
+        price_lt: 4000,
+        hotellevel: [],
+        hoteltype: [],
+        hotelasset: [],
+        hotelbrand: []
+      } //筛选框用于跳转的地址
     };
   },
   destroyed() {
@@ -658,6 +679,9 @@ export default {
           v.checked = false;
           return v;
         });
+        console.log(this.types);
+        console.log(this.assets);
+        console.log(this.brands);
       });
     },
     //获取下拉框的index
@@ -668,6 +692,8 @@ export default {
     //酒店星级筛选
     handleLeves(item, index) {
       //静态样式
+      console.log(item);
+
       const res = this.leveList.indexOf(item.name);
       if (res > -1) {
         // 已经存在
@@ -690,25 +716,27 @@ export default {
       }
       //筛选功能
       //触发的时候拼接路劲
-      let url = `price_lt=${this.price}`;
       for (let key in this.form) {
         if (this.form[key]) {
-          url += `&${key}=${this.form[key]}`;
+          this.pushUrl[key] = this.form[key];
         }
       }
+      // 查找当前数组中是否已有该id
+      const idIndex = this.pushUrl.hotellevel.indexOf(item.level);
+      if (idIndex > -1) {
+        this.pushUrl.hotellevel.splice(idIndex, 1);
+      } else {
+        // 没有值
+        this.pushUrl.hotellevel.push(item.level);
+      }
 
-      // 循环这个leveList这个数组,追加对应的参数
-      this.leveList.forEach(v => {
-        // v=1星
-        this.levels.forEach(item1 => {
-          if (v === item1.name) {
-            url += `&hotellevel=${item1.level}`;
-          }
-        });
-      });
+      console.log(this.pushUrl.hotellevel);
 
       // 跳转页面;触发路由守卫,重新请求getList,传递form的参数,更改cityName的值
-      this.$router.push(`/hotel?${url}`);
+      this.$router.push({
+        path: "/hotel",
+        query: this.pushUrl
+      });
     },
     //酒店住宿类型筛选
     handleTypes(item, index) {
@@ -732,6 +760,25 @@ export default {
       if (this.typeList.length === 0) {
         this.typeValue = "不限";
       }
+      //筛选功能
+      for (let key in this.form) {
+        if (this.form[key]) {
+          this.pushUrl[key] = this.form[key];
+        }
+      }
+
+      const idIndex = this.pushUrl.hoteltype.indexOf(item.id);
+      if (idIndex > -1) {
+        this.pushUrl.hoteltype.splice(idIndex, 1);
+      } else {
+        this.pushUrl.hoteltype.push(item.id);
+      }
+
+      // 跳转页面;触发路由守卫,重新请求getList,传递form的参数,更改cityName的值
+      this.$router.push({
+        path: "/hotel",
+        query: this.pushUrl
+      });
     },
     //酒店设施筛选
     handleAssets(item, index) {
@@ -755,6 +802,26 @@ export default {
       if (this.assetsList.length === 0) {
         this.assetsValue = "不限";
       }
+
+      //筛选功能
+      for (let key in this.form) {
+        if (this.form[key]) {
+          this.pushUrl[key] = this.form[key];
+        }
+      }
+
+      const idIndex = this.pushUrl.hotelasset.indexOf(item.id);
+      if (idIndex > -1) {
+        this.pushUrl.hotelasset.splice(idIndex, 1);
+      } else {
+        this.pushUrl.hotelasset.push(item.id);
+      }
+
+      // 跳转页面;触发路由守卫,重新请求getList,传递form的参数,更改cityName的值
+      this.$router.push({
+        path: "/hotel",
+        query: this.pushUrl
+      });
     },
     //酒店品牌筛选
     handleBrands(item, index) {
@@ -777,6 +844,25 @@ export default {
       if (this.brandsList.length === 0) {
         this.brandsValue = "不限";
       }
+      //筛选功能
+      for (let key in this.form) {
+        if (this.form[key]) {
+          this.pushUrl[key] = this.form[key];
+        }
+      }
+
+      const idIndex = this.pushUrl.hotelbrand.indexOf(item.id);
+      if (idIndex > -1) {
+        this.pushUrl.hotelbrand.splice(idIndex, 1);
+      } else {
+        this.pushUrl.hotelbrand.push(item.id);
+      }
+
+      // 跳转页面;触发路由守卫,重新请求getList,传递form的参数,更改cityName的值
+      this.$router.push({
+        path: "/hotel",
+        query: this.pushUrl
+      });
     },
     //弹出框
     open() {
@@ -828,6 +914,7 @@ export default {
           this.$store.state.hotel.hotelList[0].location.longitude
         );
       }
+
       var map = new AMap.Map("container", {
         zoom: 11, //级别
         center: [
@@ -837,6 +924,7 @@ export default {
         viewMode: "3D", //使用3D视图
         resizeEnable: true
       });
+
       //画点标记 --从仓库循环
       if (this.$store.state.hotel.hotelList.length > 1) {
         this.$store.state.hotel.hotelList.forEach((item, index) => {
@@ -880,26 +968,24 @@ export default {
     }
   },
   mounted() {
-    // this.open();
-    // 判断cityname是否有值
+    this.pushUrl.price_lt = this.price;
     if (!this.$route.query.cityName) {
       //定位
-      this.getLocation();
+      setTimeout(async () => {
+        await this.getMap();
+        await this.getLocation();
+      }, 0);
     }
     if (this.$route.query.cityName && this.form.cityName === "") {
       this.form.cityName = this.$route.query.cityName;
     }
     // 请求酒店选项
     this.getOption();
-
-    setTimeout(() => {
-      this.getMap();
-    }, 0);
   }
 };
 </script>
 
-<style lang='less' scoped>
+<style lang="less" scoped>
 .hotel {
   width: 1000px;
   color: #606266;
