@@ -21,12 +21,16 @@
           <!-- 评论、分享 按钮 -->
           <div class="share">
             <div class="share-item">
-              <i class="iconfont iconpinglun-"></i>
-              <p>评论({{postCommentsData.length}})</p>
+              <a href="javascript:;">
+                <i class="el-icon-edit-outline"></i>
+                <p>评论({{postCommentsData.length}})</p>
+              </a>
             </div>
             <div class="share-item">
-              <i class="iconfont iconfenxiang"></i>
-              <p>分享</p>
+              <a href="javascript:;" @click="$message({message:'暂不支持分享',type:'warning'})">
+                <i class="el-icon-share"></i>
+                <p>分享</p>
+              </a>
             </div>
           </div>
 
@@ -35,7 +39,12 @@
             <h4 class="com_title">评论</h4>
             <div class="form">
               <!-- @用户名 标签 -->
-              <el-tag :closable="true" :type="replyNickname">{{replyNickname}}</el-tag>
+              <el-tag
+                :closable="true"
+                v-if="replySwith"
+                @close="handleTagClose()"
+              >{{replyData.account.nickname}}</el-tag>
+              <!-- 文本域 -->
               <textarea
                 style="resize:none;width:100%;min-height:60px;border-raidus:10px;border:1px #dcdfe6 solid;border-radius:5px;margin-top:5px;padding:10px;box-sizing:border-box; "
                 placeholder="说点什么..."
@@ -43,19 +52,20 @@
               ></textarea>
               <div class="btn clearfix">
                 <div class="left">
+                  <!-- 上传组件 -->
                   <el-upload
+                    ref="pictur-upload"
                     class="avatar-uploader"
                     :action="$axios.defaults.baseURL + '/upload'"
                     name="files"
                     list-type="picture-card"
                     :on-preview="handlePictureCardPreview"
-                    :on-remove="handleRemove"
                     :on-change="handlePictureCard"
                   >
                     <i class="el-icon-plus"></i>
                   </el-upload>
                   <el-dialog :visible.sync="dialogVisible">
-                    <img width="100%" :src="dialogImageUrl" alt />
+                    <img width="100%" :src="dialogImageUrl" v-if="dialogVisible" alt />
                   </el-dialog>
                 </div>
                 <div class="right">
@@ -81,31 +91,52 @@
                 </div>
                 <div class="reply">
                   <!-- 回复组件 -->
-                  <DetailComItem v-if="item.parent" :data="item.parent" />
+                  <DetailComItem v-if="item.parent" :data="item.parent" @reply="handleReply" />
                 </div>
                 <div>
                   <div class="txt">
                     <p>{{item.content}}</p>
-                    <!-- 图片预览组件 -->
-                    <div class="demo-image__preview" v-if="item.pics.length > 0">
-                      <el-image
+
+                    <!-- 图片大图预览组件 -->
+                    <div v-if="item.pics.length > 0">
+                      <div
+                        class="demo-image__preview"
                         v-for="(item,index) in item.pics"
                         :key="index"
-                        style="width: 100px; height: 100px"
-                        :src="$axios.defaults.baseURL + item.url"
-                      ></el-image>
+                      >
+                        <el-image
+                          style="width: 100px; height: 100px"
+                          :src="$axios.defaults.baseURL + item.url"
+                          :preview-src-list="[$axios.defaults.baseURL + item.url]"
+                        ></el-image>
+                      </div>
                     </div>
                   </div>
                   <div class="replyURL">
-                    <a href="javascript:;">回复</a>
+                    <a href="javascript:;" @click="handleReply(item)">回复</a>
                   </div>
                 </div>
               </div>
             </div>
+
+            <!-- 无评论数据时显示 -->
             <div
               v-if="postCommentsData.length == 0 || postCommentsData.length <0 "
               class="zeroComment"
             >暂无评论,赶紧抢占沙发！</div>
+          </div>
+
+          <!-- 分页组件 -->
+          <div class="block" v-if="postCommentsData.length > 0">
+            <el-pagination
+              @size-change="handleSizeChange"
+              @current-change="handleCurrentChange"
+              :current-page="pageIndex"
+              :page-sizes="[5, 10, 15, 20]"
+              :page-size="5"
+              layout="total, sizes, prev, pager, next, jumper"
+              :total="commentTotal"
+            ></el-pagination>
           </div>
         </div>
       </el-col>
@@ -161,7 +192,6 @@ export default {
         return v;
       });
       this.postRecommend = postRecommend;
-      console.log(this.postRecommend);
     });
   },
 
@@ -170,31 +200,68 @@ export default {
       form: {
         content: "", //             评论内容
         post: "", //                文章ID
-        pics: [] //                 图片数据
+        pics: [], //                 图片数据
+        follow: ""
       },
       detail: {}, //                文章详情 数据
       postRecommend: {}, //         侧栏 推荐文章 数据
       postCommentsData: [], //      文章 评论、回复 数据
-      commentTotal: "", //          评论总条数
+
       //图片上传缩略图
       dialogVisible: false,
       dialogImageUrl: "",
 
       //@回复人标签
-      replyNickname: "aaaa",
-
-      //文章评论
-      _limit: 5, //评论条数
-      _start: 0 //开始数据
+      replySwith: false, //         控制 标签显示/隐藏
+      replyData: {
+        account: { nickname: "" }
+      },
+      //文章评论 //分页数据
+      limit: 5, //                 评论条数
+      start: 0, //                 开始数据
+      pageIndex: 1, //             当前页数
+      commentTotal: "" //          评论总条数
     };
   },
   methods: {
+    //分页每页条数
+    handleSizeChange(val) {
+      //修改每页条数
+      this.limit = val;
+      //初始化当前页数
+      //重新请求评论数据
+      this.getCommentsData();
+    },
+    //当前分页数
+    handleCurrentChange(val) {
+      this.pageIndex = val;
+      //第一页 20条 0-19, 第二页 6条 20-25
+      //假如 总条数=26 条数=20 , 页数=2  那么开始数据为(条数*页数-1)-(条数-1) = (20*2-1)-(20-1) = 20
+      this.start = this.limit * this.pageIndex - 1 - (this.limit - 1);
+      this.getCommentsData();
+    },
+    // 标签关闭事件
+    handleTagClose() {
+      //关闭标签
+      this.replySwith = false;
+      //将回复ID清空
+      this.form.follow = "";
+    },
+    //子组件传值事件
+    handleReply(data) {
+      //存值 到data
+      this.replyData = data;
+      // 回复ID 赋值
+      this.form.follow = this.replyData.id;
+      //显示 @用户名 标签
+      this.replySwith = true;
+    },
     //提交评论
     submitComment() {
       //是否登录
       if (this.$store.state.user.userInfo.token) {
-        //内容是否为空
-        if (this.form.content.trim() !== "") {
+        //内容是否为空 || pics长度是否大于0
+        if (this.form.content.trim() !== "" || this.form.pics.length > 0) {
           this.$axios({
             url: "/comments",
             method: "post",
@@ -203,7 +270,17 @@ export default {
             },
             data: this.form
           }).then(res => {
-            console.log(res);
+            //提交成功后重新请求评论数据
+            this.getCommentsData();
+            //关闭标签
+            this.replySwith = false;
+            //将回复ID清空
+            this.form.follow = "";
+            //将form表单 content / pics 数据初始化
+            this.form.content = "";
+            this.form.pics = [];
+            //清空已上传的文件列表
+            this.$refs["pictur-upload"].clearFiles();
           });
         } else {
           this.$message({
@@ -230,10 +307,6 @@ export default {
       this.dialogImageUrl = file.url;
       this.dialogVisible = true;
     },
-    handleRemove(file, fileList) {
-      console.log(file);
-    },
-
     //文章详情请求
     getPostData() {
       const { id } = this.$route.query;
@@ -261,17 +334,16 @@ export default {
         url: "/posts/comments",
         params: {
           post: this.form.post,
-          _start: 0,
-          _limit: 5
+          _start: this.start,
+          _limit: this.limit
         }
       }).then(res => {
-        const { data } = res.data;
+        const { data, total } = res.data;
+        this.commentTotal = total;
         this.postCommentsData = data.map(v => {
           v.created_at = moment(v.created_at).format("YYYY-MM-DD hh:mm");
           return v;
         });
-        // this.postCommentsData = data;
-        console.log(this.postCommentsData);
       });
     }
   },
@@ -318,8 +390,9 @@ export default {
       .share-item {
         margin: 0 20px;
         text-align: center;
-        .iconfont {
-          font-size: 31px;
+        .el-icon-edit-outline,
+        .el-icon-share {
+          font-size: 35px;
           color: #ffa500;
         }
         p {

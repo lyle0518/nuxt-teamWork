@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="reply-item">
-      <detailComItem v-if="data.parent" :data="data.parent" />
+      <detailComItem v-if="data.parent" :data="data.parent" @reply="handleReply" />
       <div class="user">
         <span class="username">{{data.account.nickname}}</span>
         <span class="date">{{data.created_at}}</span>
@@ -16,11 +16,12 @@
               :key="index"
               style="width: 100px; height: 100px"
               :src="$axios.defaults.baseURL + item.url"
+              :preview-src-list="[$axios.defaults.baseURL + item.url]"
             ></el-image>
           </div>
         </div>
         <div class="replyURL">
-          <a href="javascript:;">回复</a>
+          <a href="javascript:;" @click="handleReply(data)">回复</a>
         </div>
       </div>
     </div>
@@ -41,6 +42,11 @@ export default {
     data: {
       type: Object,
       default: {}
+    }
+  },
+  methods: {
+    handleReply(data) {
+      this.$emit("reply", data);
     }
   },
   components: {
