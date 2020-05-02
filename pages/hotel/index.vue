@@ -298,8 +298,11 @@
     </el-row>
 
     <!-- 酒店部分 -->
-    <el-row class="hotelitem">
+    <el-row class="hotelitem" v-if="$store.state.hotel.hotelList.length>1">
       <HotelItem v-for="(item,index) in $store.state.hotel.hotelList" :key="index" :data="item" />
+    </el-row>
+    <el-row class="none" v-else>
+      <p>暂无符合条件的酒店</p>
     </el-row>
   </div>
 </template>
@@ -308,13 +311,68 @@
 import HotelItem from "@/components/hotel/hotelItem";
 
 export default {
-  beforeRouteUpdate(to, from, next) {
-    console.log("触发");
+  async beforeRouteUpdate(to, from, next) {
     next();
     //  重新请求酒店数据
     this.form.cityName = this.$route.query.cityName;
     // this.$store.commit("hotel/setHotelForm", );
-    this.getList();
+    // 修改query里面的cityName的值
+    const { cityName, hotellevel, ...other } = this.$route.query;
+    // 追加城市信息获取id
+    await this.$axios({
+      url: "/cities",
+      params: {
+        name: cityName
+      }
+    }).then(res => {
+      const { data } = res.data;
+      if (data.length > 1) {
+      }
+      data.forEach(v => {
+        if (v.name === cityName) {
+          other.city = v.id;
+        }
+      });
+      // 处理hotellevel
+      other.hotellevel_in = hotellevel;
+    });
+    const qs = require("qs");
+
+    await this.$axios({
+      url: "/hotels",
+      params: other,
+      paramsSerializer: function(params) {
+        return qs.stringify(params, { arrayFormat: "repeat" });
+      }
+    }).then(res => {
+      // 存到本地的仓库
+      const { data } = res.data;
+      // if (data) {
+      //   //  获取仓库旧的数据
+      //   const storeLocation = this.$store.state.hotel.hotelList[0].location;
+      //   data.push({
+      //     location: storeLocation
+      //   });
+      // }
+      this.$store.commit("hotel/setHotelList", data);
+      if (this.$store.state.hotel.hotelList.length < 1) {
+        // 重新画图
+        this.getMap();
+      } else {
+        // 如果此时lenth大于1,说明数据被修改了,修改中心点的值
+        this.$store.commit(
+          "hotel/setLatitude",
+          this.$store.state.hotel.hotelList[0].location.latitude
+        );
+        this.$store.commit(
+          "hotel/setLongitude",
+          this.$store.state.hotel.hotelList[0].location.longitude
+        );
+        this.getMap();
+      }
+    });
+
+    // this.getList();
   },
   components: {
     HotelItem
@@ -491,7 +549,6 @@ export default {
         }
       }).then(res => {
         const { data } = res.data;
-        console.log(data);
 
         const list = data.map(v => {
           v.value = v.name;
@@ -503,7 +560,6 @@ export default {
     },
     //城市下拉触发
     handleSelect(item) {
-      console.log(item);
       this.area = item.scenics;
       // 存进仓库缓存
       this.$store.commit("hotel/setArea", this.area);
@@ -529,13 +585,11 @@ export default {
     },
     //提交请求
     submit() {
-      console.log(111);
       // 处理入店时间和离开事件
       if (!this.time) return;
       this.form.enterTime = this.time[0];
       this.form.leftTime = this.time[1];
       // 跳转页面
-      console.log(this.form);
       //
       this.$router.push({
         path: "/hotel",
@@ -553,18 +607,25 @@ export default {
     //分割线
     //子组件传递form参数给父组件请求酒店数据
     //data为form表单数据
+    getCity(city) {
+      return this.$axios({
+        url: "/cities",
+        params: {
+          name: city
+        }
+      }).then(res => {
+        return res;
+      });
+    },
     getList() {
       this.$axios({
         url: "/hotels",
         params: this.$store.state.hotel.hotelForm
       }).then(res => {
-        console.log(res);
-
         const { data } = res.data;
 
         // this.latitude = Number(data[0].location.latitude);
         // this.longitude = Number(data[0].location.longitude);
-        console.log(this.latitude, this.longitude);
 
         // this.centerLocation = data[0].location;
         // 存进公共仓库
@@ -578,10 +639,8 @@ export default {
       this.$axios({
         url: "/hotels/options"
       }).then(res => {
-        console.log(res);
         const { levels, types, assets, brands } = res.data.data;
         // 先给每一个选项添加checked属性 用来筛选的四个值
-        console.log(levels);
 
         this.levels = levels.map(v => {
           v.checked = false;
@@ -599,7 +658,6 @@ export default {
           v.checked = false;
           return v;
         });
-        console.log(this.levels);
       });
     },
     //获取下拉框的index
@@ -609,7 +667,6 @@ export default {
     },
     //酒店星级筛选
     handleLeves(item, index) {
-      // console.log(item);
       //静态样式
       const res = this.leveList.indexOf(item.name);
       if (res > -1) {
@@ -620,8 +677,6 @@ export default {
         this.leveList.push(item.name);
       }
       //r如果长度大于1,修改属性
-      console.log(this.leveList.length);
-      console.log(this.leveList);
 
       if (this.leveList.length > 1) {
         this.leveValue = `已选${this.leveList.length}项`;
@@ -635,7 +690,6 @@ export default {
       }
       //筛选功能
       //触发的时候拼接路劲
-      console.log(this.$axios);
       let url = `price_lt=${this.price}`;
       for (let key in this.form) {
         if (this.form[key]) {
@@ -653,17 +707,11 @@ export default {
         });
       });
 
-      console.log(url);
-
       // 跳转页面;触发路由守卫,重新请求getList,传递form的参数,更改cityName的值
-      // this.$route.push({
-      //   path: "/hotel",
-      //   query: this.form
-      // });
+      this.$router.push(`/hotel?${url}`);
     },
     //酒店住宿类型筛选
     handleTypes(item, index) {
-      console.log(item);
       const res = this.typeList.indexOf(item.name);
       if (res > -1) {
         // 已经存在
@@ -673,8 +721,6 @@ export default {
         this.typeList.push(item.name);
       }
       //r如果长度大于1,修改属性
-      console.log(this.typeList.length);
-      console.log(this.typeList);
 
       if (this.typeList.length > 1) {
         this.typeValue = `已选${this.typeList.length}项`;
@@ -698,8 +744,6 @@ export default {
         this.assetsList.push(item.name);
       }
       //r如果长度大于1,修改属性
-      console.log(this.assetsList.length);
-      console.log(this.assetsList);
 
       if (this.assetsList.length > 1) {
         this.assetsValue = `已选${this.assetsList.length}项`;
@@ -722,9 +766,6 @@ export default {
         //  追加
         this.brandsList.push(item.name);
       }
-      //r如果长度大于1,修改属性
-      console.log(this.brandsList.length);
-      console.log(this.brandsList);
 
       if (this.brandsList.length > 1) {
         this.brandsValue = `已选${this.brandsList.length}项`;
@@ -742,10 +783,7 @@ export default {
       this.$alert(`定位当前城市:${this.mapCity}`, "提示", {
         confirmButtonText: "确定",
         callback: action => {
-          // console.log(111);
           // 点击确认的时候用这个城市名请求城市信息
-          console.log(this.mapcity);
-
           this.$axios({
             url: "/cities",
             params: {
@@ -753,7 +791,6 @@ export default {
             }
           }).then(res => {
             const { data } = res.data;
-            console.log(data);
             this.area = data.scenics;
             data.forEach(v => {
               if (v.name === this.mapCity) {
@@ -764,6 +801,7 @@ export default {
               }
             });
           });
+
           //跳转到cityname
           this.$router.push({
             path: "/hotel",
@@ -771,42 +809,57 @@ export default {
               cityName: this.mapCity
             }
           });
+          if (this.$route.query.cityName && this.form.cityName === "") {
+            this.form.cityName = this.$route.query.cityName;
+          }
         }
       });
     },
-    // 画图
+    // 生成地图
     getMap() {
       // 随机获取一个酒店的地点作为地图的中心点
-      const { location } = this.$store.state.hotel.hotelList[0];
-      this.latitude = location.latitude;
-      this.longitude = location.longitude;
+      if (this.$store.state.hotel.hotelList.length > 1) {
+        this.$store.commit(
+          "hotel/setLatitude",
+          this.$store.state.hotel.hotelList[0].location.latitude
+        );
+        this.$store.commit(
+          "hotel/setLongitude",
+          this.$store.state.hotel.hotelList[0].location.longitude
+        );
+      }
       var map = new AMap.Map("container", {
         zoom: 11, //级别
-        center: [this.longitude, this.latitude], //中心点坐标
+        center: [
+          this.$store.state.hotel.longitude,
+          this.$store.state.hotel.latitude
+        ], //中心点坐标
         viewMode: "3D", //使用3D视图
         resizeEnable: true
       });
-      //点标记 --从仓库循环
-      this.$store.state.hotel.hotelList.forEach((item, index) => {
-        const hotelLatitude = item.location.latitude;
-        const hotelLongitude = item.location.longitude;
+      //画点标记 --从仓库循环
+      if (this.$store.state.hotel.hotelList.length > 1) {
+        this.$store.state.hotel.hotelList.forEach((item, index) => {
+          const hotelLatitude = item.location.latitude;
+          const hotelLongitude = item.location.longitude;
 
-        var marker = new AMap.Marker({
-          position: new AMap.LngLat(hotelLongitude, hotelLatitude), // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
-          title: `${item.name}`
+          var marker = new AMap.Marker({
+            position: new AMap.LngLat(hotelLongitude, hotelLatitude), // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
+            title: `${item.name}`
+          });
+          map.add(marker);
         });
-        map.add(marker);
-      });
+      }
 
       // 根据酒店的数量生成对应的标记标到地图上
-      // var marker = new AMap.Marker({
-      //   // position: new AMap.LngLat(113.3245904, 23.1066805), // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
-      //   // title: "广州塔"
-      // });
+
       // map.add(marker);
       //获取当前定位的城市用于显示
       // 获取当前连接是否有query参数cityName值,如果为true,则执行定位
-      if (this.$route.query.cityName) return;
+    },
+    // 定位
+    getLocation() {
+      // 如果地址没有城市则触发
       var citysearch = new AMap.CitySearch();
       citysearch.getLocalCity((status, result) => {
         if (status === "complete" && result.info === "OK") {
@@ -815,7 +868,11 @@ export default {
             var citybounds = result.bounds;
             //弹出框
             // cityinfo --当前城市
+            // 定位发送城市的请求
+            const data = this.getCity(cityinfo);
+
             this.mapCity = cityinfo;
+            this.getMap();
             this.open();
           }
         }
@@ -825,15 +882,17 @@ export default {
   mounted() {
     // this.open();
     // 判断cityname是否有值
+    if (!this.$route.query.cityName) {
+      //定位
+      this.getLocation();
+    }
     if (this.$route.query.cityName && this.form.cityName === "") {
       this.form.cityName = this.$route.query.cityName;
     }
     // 请求酒店选项
     this.getOption();
-    // this.getList();
 
     setTimeout(() => {
-      // 请求酒店的数据
       this.getMap();
     }, 0);
   }
@@ -917,6 +976,9 @@ export default {
   overflow: auto;
   width: 135px !important;
 }
-
+.none {
+  padding: 30px 0;
+  text-align: center;
+}
 //标记的样式
 </style>

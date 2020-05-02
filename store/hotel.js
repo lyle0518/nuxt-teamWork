@@ -1,6 +1,6 @@
 export const state = function() {
   return {
-    hotelList: [{}],
+    hotelList: "",
     hotelForm: {
       //切换城市
       city: "",
@@ -10,7 +10,10 @@ export const state = function() {
       leftTime: ""
     },
     //区域列表
-    area: []
+    area: [],
+    //地图中心点数据
+    latitude: "", //纬度
+    longitude: "" //经度
   };
 };
 export const mutations = {
@@ -25,5 +28,11 @@ export const mutations = {
   },
   setArea(state, data) {
     state.area = data;
+  },
+  setLatitude(state, data) {
+    state.latitude = data;
+  },
+  setLongitude(state, data) {
+    state.longitude = data;
   }
 };
