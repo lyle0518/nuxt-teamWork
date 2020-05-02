@@ -1,16 +1,27 @@
 <template>
   <div class="editor">
-    <input type="text" />
+    <no-ssr placeholder="Loading Your Editor...">
+      <vue-editor v-model="content"></vue-editor>
+    </no-ssr>
   </div>
 </template>
 
 <script>
-export default {};
+export default {
+  asyncData() {
+    return {
+      content: "",
+      pageIsMounted: false,
+      isSSR: process.server ? true : false
+    };
+  }
+
+  // components: { VueEditor },
+};
 </script>
 
 <style scoped lang="less">
-.editor {
-  height: 458px;
-  border: 1px solid #ccc;
+/deep/ .ql-container {
+  height: 400px;
 }
 </style>

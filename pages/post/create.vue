@@ -1,10 +1,14 @@
 <template>
   <div class="container clearfix">
+    <!-- 左侧主体部分 -->
     <div class="main">
       <h2>发表新攻略</h2>
       <p class="share">分享你的个人游记，让更多人看到哦！</p>
       <el-input placeholder="请输入标题" class="inp-title"></el-input>
+
+      <!-- 富文本编辑器 -->
       <createUI />
+
       <div class="city">
         <span>选择城市</span>
         <el-input placeholder="请搜索游玩城市" class="inp-city"></el-input>
@@ -16,6 +20,7 @@
       </div>
     </div>
 
+    <!-- 侧边栏草稿箱 -->
     <createAside />
   </div>
 </template>
