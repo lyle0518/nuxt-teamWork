@@ -166,6 +166,7 @@ export default {
 			},
 			recommed(city){
 					this.city = city
+					this.pageIndex = 1
 					this.request()
 			}
 	}
