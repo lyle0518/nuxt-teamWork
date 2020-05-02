@@ -8,7 +8,7 @@
 						id:data.id
 					}
 				}">
-					<img style="width: 220px; height: 150px;" :src="data.images[0]">
+					<img style="width: 220px; height: 150px;object-fit:cover;" :src="data.images[0]">
 				</nuxt-link>
 			</div>
 			<div class="item_right">
@@ -69,12 +69,12 @@
 		.list_item{
 			padding: 20px 0;
 			display: flex;
-			justify-content: space-between;
 			align-items: center;
 			.item_left{
 				margin-right: 10px;
 			}
 			.item_right{
+				flex: 1;
 				.item_h4{
 					font-weight: 400;
 					font-size: 18px;
