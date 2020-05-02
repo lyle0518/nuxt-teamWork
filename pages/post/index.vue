@@ -103,6 +103,7 @@ export default {
 	methods:{
 		back(){
 			this.city = ''
+			this.pageIndex = 1
 			this.request();
 		},
 		request(){
