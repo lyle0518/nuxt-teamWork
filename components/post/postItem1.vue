@@ -28,7 +28,7 @@
 						id:data.id
 					}
 				}" v-for="(item,index) in data.images.slice(0,3)" :key="index">
-					<img class="img2" :src="item">
+					<img class="img2" :src="item" style="object-fit:cover;">
 				</nuxt-link>
 			</div>
 			<div class="item_bottom">
@@ -38,7 +38,7 @@
 						<span>{{data.cityName}}</span>
 					</div>
 					<span class="span6">by</span>
-					<nuxt-link to="#"><img :src="'http://127.0.0.1:1337' + data.account.defaultAvatar" class="img3"></nuxt-link>
+					<nuxt-link to="#"><img :src="$axios.defaults.baseURL + data.account.defaultAvatar" class="img3"></nuxt-link>
 					<nuxt-link to="#" class="span6" style="color: #FFA500;">{{data.account.nickname}}</nuxt-link>
 					<div class="span6">
 						<span class="el-icon-view"></span>

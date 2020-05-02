@@ -8,7 +8,7 @@
 						id:data.id
 					}
 				}">
-					<img style="width: 220px; height: 150px;" :src="data.images[0]">
+					<img style="width: 220px; height: 150px;object-fit:cover;" :src="data.images[0]">
 				</nuxt-link>
 			</div>
 			<div class="item_right">
@@ -39,7 +39,7 @@
 							<span>{{data.cityName}}</span>
 						</div>
 						<span class="span6">by</span>
-						<nuxt-link to="#"><img :src="'http://127.0.0.1:1337' + data.account.defaultAvatar" class="img3"></nuxt-link>
+						<nuxt-link to="#"><img :src="$axios.defaults.baseURL + data.account.defaultAvatar" class="img3"></nuxt-link>
 						<nuxt-link to="#" class="span6" style="color: #FFA500;">{{data.account.nickname}}</nuxt-link>
 						<div class="span6">
 							<span class="el-icon-view"></span>
@@ -69,12 +69,12 @@
 		.list_item{
 			padding: 20px 0;
 			display: flex;
-			justify-content: space-between;
 			align-items: center;
 			.item_left{
 				margin-right: 10px;
 			}
 			.item_right{
+				flex: 1;
 				.item_h4{
 					font-weight: 400;
 					font-size: 18px;
