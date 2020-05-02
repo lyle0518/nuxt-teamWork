@@ -13,7 +13,7 @@
           <h1 class="title">{{detail.title}}</h1>
           <!-- 阅读量、时间 -->
           <el-col :span="24" class="text">
-            <span>攻略：{{createDate}}</span>
+            <span>攻略：{{detail.created_at}}</span>
             <span>阅读：{{detail.watch}}</span>
           </el-col>
           <!-- 文章内容 -->
@@ -34,9 +34,12 @@
           <div class="comment">
             <h4 class="com_title">评论</h4>
             <div class="form">
+              <!-- @用户名 标签 -->
+              <el-tag :closable="true" :type="replyNickname">{{replyNickname}}</el-tag>
               <textarea
-                style="resize:none;width:100%;min-height:60px;border-raidus:10px;border:1px #dcdfe6 solid;border-radius:5px;"
+                style="resize:none;width:100%;min-height:60px;border-raidus:10px;border:1px #dcdfe6 solid;border-radius:5px;margin-top:5px;padding:10px;box-sizing:border-box; "
                 placeholder="说点什么..."
+                v-model="form.content"
               ></textarea>
               <div class="btn clearfix">
                 <div class="left">
@@ -47,6 +50,7 @@
                     list-type="picture-card"
                     :on-preview="handlePictureCardPreview"
                     :on-remove="handleRemove"
+                    :on-change="handlePictureCard"
                   >
                     <i class="el-icon-plus"></i>
                   </el-upload>
@@ -55,7 +59,7 @@
                   </el-dialog>
                 </div>
                 <div class="right">
-                  <el-button type="primary">提交</el-button>
+                  <el-button type="primary" @click="submitComment">提交</el-button>
                 </div>
               </div>
             </div>
@@ -73,13 +77,29 @@
                     class="avatar"
                   />
                   <span class="username">{{item.account.nickname}}</span>
-                  <span class="date">2020年4月30日19:39:33</span>
+                  <span class="date">{{ item.created_at}}</span>
                 </div>
                 <div class="reply">
                   <!-- 回复组件 -->
                   <DetailComItem v-if="item.parent" :data="item.parent" />
                 </div>
-                <p class="txt">{{item.content}}</p>
+                <div>
+                  <div class="txt">
+                    {{item.content}}
+                    <!-- 图片预览组件 -->
+                    <div class="demo-image__preview" v-if="item.pics.length > 0">
+                      <el-image
+                        v-for="(item,index) in item.pics"
+                        :key="index"
+                        style="width: 100px; height: 100px"
+                        :src="$axios.defaults.baseURL + item.url"
+                      ></el-image>
+                    </div>
+                  </div>
+                  <div class="replyURL">
+                    <a href="javascript:;">回复</a>
+                  </div>
+                </div>
               </div>
             </div>
             <div
@@ -124,6 +144,7 @@ export default {
     $route() {
       //页面地址栏变化时重新请求数据
       this.getPostData();
+      this.getCommentsData();
     }
   },
   mounted() {
@@ -140,19 +161,27 @@ export default {
         return v;
       });
       this.postRecommend = postRecommend;
+      console.log(this.postRecommend);
     });
   },
 
   data() {
     return {
-      post: "", //  文章ID
-      detail: {}, // 文章详情 数据
-      createDate: "", // 文章详情 时间
-      postRecommend: {}, //侧栏 推荐文章 数据
-      postCommentsData: [], //文章 评论、回复 数据
+      form: {
+        content: "", //             评论内容
+        post: "", //                文章ID
+        pics: [] //                 图片数据
+      },
+      detail: {}, //                文章详情 数据
+      postRecommend: {}, //         侧栏 推荐文章 数据
+      postCommentsData: [], //      文章 评论、回复 数据
+      commentTotal: "", //          评论总条数
       //图片上传缩略图
       dialogVisible: false,
       dialogImageUrl: "",
+
+      //@回复人标签
+      replyNickname: "aaaa",
 
       //文章评论
       _limit: 5, //评论条数
@@ -160,9 +189,44 @@ export default {
     };
   },
   methods: {
+    //提交评论
+    submitComment() {
+      //是否登录
+      if (this.$store.state.user.userInfo.token) {
+        //内容是否为空
+        if (this.form.content.trim() !== "") {
+          this.$axios({
+            url: "/comments",
+            method: "post",
+            headers: {
+              Authorization: "Bearer " + this.$store.state.user.userInfo.token
+            },
+            data: this.form
+          }).then(res => {
+            console.log(res);
+          });
+        } else {
+          this.$message({
+            message: "评论内容不能为空!",
+            type: "warning"
+          });
+        }
+      } else {
+        this.$message({
+          message: "请先登录!",
+          type: "error"
+        });
+      }
+    },
+    //上传发生变化时;
+    handlePictureCard(file) {
+      if (file.response) {
+        let files = [{ ...file.response }];
+        this.form.pics.push(files[0][0]);
+      }
+    },
     //图片上传成功时
     handlePictureCardPreview(file) {
-      console.log(file);
       this.dialogImageUrl = file.url;
       this.dialogVisible = true;
     },
@@ -173,7 +237,7 @@ export default {
     //文章详情请求
     getPostData() {
       const { id } = this.$route.query;
-      this.post = id;
+      this.form.post = id;
 
       //文章详情
       this.$axios({
@@ -184,11 +248,9 @@ export default {
       }).then(res => {
         const { data } = res.data;
         this.detail = { ...data[0] };
-        //   console.log(this.detail);
-        let createDate = moment(this.detail.created_at).format(
+        this.detail.created_at = moment(this.detail.created_at).format(
           "YYYY-MM-DD hh:mm"
         );
-        this.createDate = createDate;
       });
     },
 
@@ -198,17 +260,22 @@ export default {
       this.$axios({
         url: "/posts/comments",
         params: {
-          post: this.post,
+          post: this.form.post,
           _start: 0,
           _limit: 5
         }
       }).then(res => {
         const { data } = res.data;
-        this.postCommentsData = data;
+        this.postCommentsData = data.map(v => {
+          v.created_at = moment(v.created_at).format("YYYY-MM-DD hh:mm");
+          return v;
+        });
+        // this.postCommentsData = data;
         console.log(this.postCommentsData);
       });
     }
   },
+  computed: {},
   components: {
     moment,
     DetailComItem
@@ -225,7 +292,6 @@ export default {
   margin: 0 auto;
   .el-row {
     margin: 20px 0;
-
     //头部
     .title {
       padding: 20px 0;
@@ -272,7 +338,6 @@ export default {
         font-size: 18px;
       }
       .btn {
-        padding: 5px 0;
         .left {
           float: left;
           //上传组件样式
@@ -327,6 +392,7 @@ export default {
         }
       }
       .right {
+        min-height: 40px;
         h4 {
           position: absolute;
           top: 20px;
@@ -360,10 +426,17 @@ export default {
           .date {
             color: #ccc;
           }
+          .replyURL {
+            font-size: 12px;
+            padding-bottom: 10px;
+            text-align: right;
+            padding-right: 10px;
+            color: #1e50a2;
+          }
           .txt {
             padding: 8px 0;
             margin-left: 20px;
-            font-size: 16px;
+            font-size: 15px;
           }
         }
         // .reply {
@@ -386,6 +459,9 @@ export default {
       }
     }
   }
+}
+/deep/.el-image {
+  margin-right: 5px;
 }
 
 .clearfix:after {
