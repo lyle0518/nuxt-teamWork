@@ -180,5 +180,8 @@ export default {
 .actives{
 	color: #fff;
 	background: #409eff;
+	 &:hover{
+		 color: #fff!important;
+	 }
 }
 </style>
