@@ -69,6 +69,7 @@ export default {
   padding: 8px 0;
   margin-left: 20px;
   font-size: 14px;
+  word-break: break-all;
 }
 
 /deep/.el-image {

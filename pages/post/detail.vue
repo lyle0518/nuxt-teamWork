@@ -85,7 +85,7 @@
                 </div>
                 <div>
                   <div class="txt">
-                    {{item.content}}
+                    <p>{{item.content}}</p>
                     <!-- 图片预览组件 -->
                     <div class="demo-image__preview" v-if="item.pics.length > 0">
                       <el-image
@@ -437,6 +437,7 @@ export default {
             padding: 8px 0;
             margin-left: 20px;
             font-size: 15px;
+            word-break: break-all;
           }
         }
         // .reply {
