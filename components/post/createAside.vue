@@ -4,23 +4,32 @@
       <h4 class="draft-title">草稿箱 ( 5 )</h4>
       <div class="draf-list">
         <div class="draf-item">
-          <span>闲云旅游1</span>
-          <i class="el-icon-edit draf-icon"></i>
+          <span class="draf-title">
+            闲云旅游1
+            <i class="el-icon-edit draf-icon"></i>
+          </span>
+
           <p class="draf-date">2020-05-01</p>
         </div>
         <div class="draf-item">
-          <span>闲云旅游2</span>
-          <i class="el-icon-edit draf-icon"></i>
+          <span class="draf-title">
+            闲云旅游2
+            <i class="el-icon-edit draf-icon"></i>
+          </span>
+
           <p class="draf-date">2020-05-01</p>
         </div>
         <div class="draf-item">
-          <span>闲云旅游3</span>
-          <i class="el-icon-edit draf-icon"></i>
+          <span class="draf-title">
+            闲云旅游3
+            <i class="el-icon-edit draf-icon"></i>
+          </span>
           <p class="draf-date">2020-05-01</p>
         </div>
         <div class="draf-item">
-          <span></span>
-          <i class="el-icon-edit draf-icon"></i>
+          <span class="draf-title">
+            <i class="el-icon-edit draf-icon"></i>
+          </span>
           <p class="draf-date">2020-05-01</p>
         </div>
       </div>
@@ -47,9 +56,21 @@ export default {};
     .draf-item {
       margin-bottom: 10px;
       font-size: 14px;
-      .draf-icon {
-        font-size: 16px;
+      .draf-title {
+        .draf-icon {
+          font-size: 16px;
+          &:hover {
+            color: #ffa500;
+            cursor: pointer;
+          }
+        }
+        &:hover {
+          color: #ffa500;
+          text-decoration: underline;
+          cursor: pointer;
+        }
       }
+
       .draf-date {
         color: #999;
       }

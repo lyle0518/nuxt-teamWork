@@ -3,22 +3,30 @@
 		<el-row class="row" style="width: 1000px; margin: 0 auto; padding: 10 0;">
 			<el-col :span="7" class="left">
 				<div style="position: relative;" @mouseenter="show = true" @mouseleave="hans()" class="box">
-					<div class="menus" >
-						<div class="menu_item" :class="indexs === index?'actives':''" v-for="(item,index) in likeList" :key="index" @mouseenter="han(index)">
-							<span class="span1">{{item.type}}</span>
+					<div class="menus">
+						<div class="menu_item" :class="indexs === index ? 'actives' : ''" v-for="(item, index) in likeList" :key="index" @mouseenter="han(index)">
+							<span class="span1">{{ item.type }}</span>
 							<span class="el-icon-arrow-right span2"></span>
 						</div>
 					</div>
 					<div class="active" v-if="show">
 						<ul>
-							<li v-for="(item,index) in likeList[indexss].children" :key="index"><i>{{index + 1}}</i><strong @click="recommed(item.city)"><nuxt-link to="#">{{item.city}}</nuxt-link></strong><span @click="recommed(item.city)"><nuxt-link to="#">{{item.desc}}</nuxt-link></span></li>
+							<li v-for="(item, index) in likeList[indexss].children" :key="index">
+								<i>{{ index + 1 }}</i>
+								<strong @click="recommed(item.city)">
+									<nuxt-link to="#">{{ item.city }}</nuxt-link>
+								</strong>
+								<span @click="recommed(item.city)">
+									<nuxt-link to="#">{{ item.desc }}</nuxt-link>
+								</span>
+							</li>
 						</ul>
 					</div>
 				</div>
 				<div class="recommed">
 					<h4>推荐城市</h4>
 					<div style="padding-bottom: 10px; border-bottom: 1px solid #ddd; margin-bottom: 10px;"></div>
-					<img src="../../static/pic_sea.jpeg"  @click="back()"/>
+					<img src="../../static/pic_sea.jpeg" @click="back()" />
 				</div>
 			</el-col>
 			<el-col :span="17" class="right">
@@ -40,7 +48,7 @@
 					</el-button>
 					<div class="line"></div>
 				</div>
-				<div v-for="(item, index) in list" :key="index">
+				<div v-for="(item, index) in lists" :key="index">
 					<postItem1 v-if="item.images.length >= 3" :data="item"></postItem1>
 					<postItem2 v-if="item.images.length < 3 && item.images.length > 0" :data="item"></postItem2>
 					<postItem3 v-if="item.images.length === 0" :data="item"></postItem3>
@@ -52,7 +60,7 @@
 					:page-sizes="[3, 5, 10, 15]"
 					:page-size="pageSize"
 					layout="total, sizes, prev, pager, next, jumper"
-					:total="lists.length"
+					:total="totals"
 					class="el_p"
 				></el-pagination>
 			</el-col>
@@ -72,102 +80,110 @@ export default {
 	},
 	data() {
 		return {
-			list: [],
-			lists:[],
-			pageIndex:1,
-			pageSize:3,
-			city:'',
-			show:false,
+			lists: [],
+			pageIndex: 1,
+			pageSize: 3,
+			city: '',
+			show: false,
 			indexs: '',
-			likeList:[],
-			indexss:0
-		}
+			likeList: [],
+			indexss: 0,
+			totals: 0
+		};
 	},
 	mounted() {
 		this.$router.push({
 			// path:'/post',
-			query:{
-				start:0,
-				limit:3
+			query: {
+				start: 0,
+				limit: 3
 			}
-		})
-		this.request()
+		});
+		this.request();
 		this.$axios({
-			url:'/posts/cities'
+			url: '/posts/cities'
 		}).then(res => {
-			console.log(res)
-			const {data} = res.data
-			this.likeList = data
-			})
+			console.log(res);
+			const { data } = res.data;
+			this.likeList = data;
+		});
 	},
-	methods:{
-		back(){
-			this.city = ''
-			this.pageIndex = 1
+	methods: {
+		back() {
+			this.city = '';
+			this.pageIndex = 1;
 			this.request();
 		},
-		request(){
+		request() {
 			const datas = {
-				url: '/posts',
-			}
-			if(this.city.trim() !== ''){
+				url: '/posts'
+			};
+			if (this.city.trim() !== '') {
 				datas.params = {
-					city:this.city
-				}
+					city: this.city,
+					_start: (this.pageIndex - 1) * this.pageSize,
+					_limit: this.pageSize
+				};
 				this.$router.push({
-					query:{
-						start:(this.pageIndex - 1 )* this.pageSize,
-						limit:this.pageSize,
-						city:this.city
+					query: {
+						start: (this.pageIndex - 1) * this.pageSize,
+						limit: this.pageSize,
+						city: this.city
 					}
-				})
-			}else{
-					this.$router.push({
-						query:{
-							start:(this.pageIndex - 1 )* this.pageSize,
-							limit:this.pageSize,
-						}
-					})
+				});
+			} else {
+				datas.params = {
+					_start: (this.pageIndex - 1) * this.pageSize,
+					_limit: this.pageSize
+				};
+				this.$router.push({
+					query: {
+						start: (this.pageIndex - 1) * this.pageSize,
+						limit: this.pageSize
+					}
+				});
 			}
 			this.$axios(datas).then(res => {
 				// console.log(res);
+				this.totals = res.data.total;
 				const { data } = res.data;
-				this.lists = data
-				this.list = data.slice((this.pageIndex - 1 )* this.pageSize,this.pageIndex * this.pageSize);
+				this.lists = data;
+				// this.list = data.slice((this.pageIndex - 1 )* this.pageSize,this.pageIndex * this.pageSize);
 				// console.log(this.list);
 			});
 		},
-		recommedCity(data){
-			this.city = data
-			this.pageIndex = 1
-			this.request()
+		recommedCity(data) {
+			this.city = data;
+			this.pageIndex = 1;
+			this.request();
 		},
 		handleSizeChange(val) {
-				this.pageIndex = 1
-        this.pageSize = val
-				this.request()
-      },
-    handleCurrentChange(val) {
-        this.pageIndex = val
-				this.request()
-      },
-		handSearch(){
-				this.pageIndex = 1
-				this.request()
-			},
-			han(val){
-				this.indexs = val
-				this.indexss = this.indexs
-			},
-			hans(){
-				this.show = false
-				this.indexs = ''
-				this.indexss = 0
-			},
-			recommed(city){
-					this.city = city
-					this.request()
-			}
+			this.pageIndex = 1;
+			this.pageSize = val;
+			this.request();
+		},
+		handleCurrentChange(val) {
+			this.pageIndex = val;
+			this.request();
+		},
+		handSearch() {
+			this.pageIndex = 1;
+			this.request();
+		},
+		han(val) {
+			this.indexs = val;
+			this.indexss = this.indexs;
+		},
+		hans() {
+			this.show = false;
+			this.indexs = '';
+			this.indexss = 0;
+		},
+		recommed(city) {
+			this.city = city;
+			this.pageIndex = 1;
+			this.request();
+		}
 	}
 };
 </script>
@@ -180,7 +196,7 @@ export default {
 		// height: 100px;
 		padding-right: 28px;
 		position: relative;
-		.box{
+		.box {
 			.menus {
 				width: 260px;
 				border: 1px solid #ddd;
@@ -208,12 +224,12 @@ export default {
 						margin-right: -10px;
 					}
 				}
-				.actives{
+				.actives {
 					color: orange;
 					border-right-color: #fff;
 				}
 			}
-			.active{
+			.active {
 				width: 350px;
 				position: absolute;
 				left: 259px;
@@ -223,31 +239,31 @@ export default {
 				background: #fff;
 				padding: 10px 20px;
 				box-sizing: border-box;
-				ul{
-					li{
+				ul {
+					li {
 						line-height: 36px;
 						color: #999;
 						font-size: 14px;
 						display: flex;
 						align-items: center;
-						i{
+						i {
 							font-style: italic;
 							font-size: 24px;
 							color: orange;
 						}
-						strong{
+						strong {
 							font-weight: 400;
 							margin: 0 10px;
 							color: orange;
 						}
-							a:hover{
+						a:hover {
 							text-decoration: underline;
 						}
 					}
 				}
 			}
 		}
-		
+
 		.recommed {
 			margin-top: 20px;
 			h4 {
@@ -284,7 +300,7 @@ export default {
 			font-size: 12px;
 			color: #666;
 			padding: 10px 0;
-			.span4{
+			.span4 {
 				margin-right: 5px;
 			}
 			.span4_1 {
@@ -322,7 +338,7 @@ export default {
 				}
 			}
 		}
-		.el_p{
+		.el_p {
 			margin-top: 10px;
 		}
 	}
