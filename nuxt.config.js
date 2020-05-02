@@ -30,14 +30,18 @@ export default {
   /*
    ** Global CSS
    */
-  css: ["element-ui/lib/theme-chalk/index.css", "assets/main.css"],
+  css: [
+    "element-ui/lib/theme-chalk/index.css",
+    "assets/main.css"
+  ],
   /*
    ** Plugins to load before mounting the App
    */
   plugins: [
     "@/plugins/element-ui",
     { src: "~/plugins/localStorage.js", ssr: false },
-    "@/plugins/axios"
+    "@/plugins/axios",
+    { src: "~/plugins/vue2-editor", ssr: false }
   ],
   /*
    ** Nuxt.js dev-modules
@@ -66,6 +70,6 @@ export default {
     /*
      ** You can extend webpack config here
      */
-    extend(config, ctx) {}
+    extend(config, ctx) { }
   }
 };
