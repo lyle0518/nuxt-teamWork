@@ -1,6 +1,6 @@
 export const state = function() {
   return {
-    hotelList: [],
+    hotelList: [{}],
     hotelForm: {
       //切换城市
       city: "",
@@ -8,7 +8,9 @@ export const state = function() {
       enterTime: "",
       //离店
       leftTime: ""
-    }
+    },
+    //区域列表
+    area: []
   };
 };
 export const mutations = {
@@ -20,5 +22,8 @@ export const mutations = {
   },
   setHotelFormCity(state, data) {
     state.hotelForm.city = data;
+  },
+  setArea(state, data) {
+    state.area = data;
   }
 };

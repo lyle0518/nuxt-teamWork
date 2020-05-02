@@ -11,7 +11,7 @@
 					</div>
 					<div class="active" v-if="show">
 						<ul>
-							<li v-for="(item,index) in likeList[indexss].children" :key="index"><i>{{index + 1}}</i><strong><nuxt-link to="#">{{item.city}}</nuxt-link></strong><nuxt-link to="#">{{item.desc}}</nuxt-link></li>
+							<li v-for="(item,index) in likeList[indexss].children" :key="index"><i>{{index + 1}}</i><strong @click="recommed(item.city)"><nuxt-link to="#">{{item.city}}</nuxt-link></strong><span @click="recommed(item.city)"><nuxt-link to="#">{{item.desc}}</nuxt-link></span></li>
 						</ul>
 					</div>
 				</div>
@@ -85,7 +85,7 @@ export default {
 	},
 	mounted() {
 		this.$router.push({
-			path:'/post',
+			// path:'/post',
 			query:{
 				start:0,
 				limit:3
@@ -162,16 +162,11 @@ export default {
 				this.show = false
 				this.indexs = ''
 				this.indexss = 0
+			},
+			recommed(city){
+					this.city = city
+					this.request()
 			}
-	},
-	watch:{
-		$route(){
-			if(!this.$route.query.city){
-				this.city = ''
-				this.request()
-			}
-			
-		}
 	}
 };
 </script>

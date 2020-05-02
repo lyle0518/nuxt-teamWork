@@ -77,7 +77,7 @@ export default {
   },
 	watch:{
 		'$route.query'(){
-				if(this.$route.query.limit){
+				if(this.$route.query.limit || this.$route.query.id){
 					this.actives = true
 				}else{
 					this.actives = false

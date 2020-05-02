@@ -91,19 +91,9 @@
         <div class="left">
           <el-row style="margin-bottom:20px">
             <el-col :span="3">区域:</el-col>
-            <el-col :span="21">
+            <el-col :span="21" class="area">
               <!-- 需要循环处理的数据 -->
-              <a href="#">人民广场</a>
-              <a href="#">人民广场</a>
-              <a href="#">人民广场</a>
-              <a href="#">人民广场</a>
-              <a href="#">人民广场</a>
-              <a href="#">人民广场</a>
-              <a href="#">人民广场</a>
-              <a href="#">人民广场</a>
-              <a href="#">人民广场</a>
-              <a href="#">人民广场</a>
-              <a href="#">人民广场</a>
+              <a href="#" v-for="(item,index) in $store.state.hotel.area" :key="index">{{item.name}}</a>
             </el-col>
           </el-row>
           <el-row>
@@ -195,28 +185,109 @@
         </el-col>
       </el-col>
 
-      <!-- 循环的数据 -->
       <el-col :span="18">
-        <el-col :span="6" class="col-item" v-for="(item,index) in hoteltype" :key="index">
+        <!-- 四个筛选 -->
+        <!-- 住宿等级 -->
+        <el-col :span="6" class="col-item">
           <el-col :span="24" class="col-item-second">
-            <span>{{item.label}}</span>
+            <span>酒店等级</span>
             <!-- 双向数据绑定 -->
           </el-col>
           <!-- 下拉菜单 -->
           <el-col :span="24">
-            <el-dropdown>
+            <el-dropdown placement="bottom-start">
               <span class="el-dropdown-link link">
-                {{item.value}}
+                {{leveValue}}
                 <i class="el-icon-arrow-down el-icon--right"></i>
               </span>
               <el-dropdown-menu slot="dropdown" style="padding:10px">
                 <!-- 循环的数据 -->
                 <el-checkbox
-                  v-model="item1.checked"
-                  v-for="(item1,index1) in item.levCommand"
-                  :key="index1"
-                  :label="item1.label"
-                  @change="handleSelectLev(item1,index)"
+                  v-for="(item,index) in levels"
+                  v-model="item.checked"
+                  :key="index"
+                  :label="item.name"
+                  @change="handleLeves(item,index)"
+                  style="display:block;margin-bottom:10px"
+                ></el-checkbox>
+              </el-dropdown-menu>
+            </el-dropdown>
+          </el-col>
+        </el-col>
+        <!-- 住宿类型 -->
+        <el-col :span="6" class="col-item">
+          <el-col :span="24" class="col-item-second">
+            <span>住宿类型</span>
+            <!-- 双向数据绑定 -->
+          </el-col>
+          <!-- 下拉菜单 -->
+          <el-col :span="24">
+            <el-dropdown placement="bottom-start">
+              <span class="el-dropdown-link link">
+                {{typeValue}}
+                <i class="el-icon-arrow-down el-icon--right"></i>
+              </span>
+              <el-dropdown-menu slot="dropdown" style="padding:10px">
+                <!-- 循环的数据 -->
+                <el-checkbox
+                  v-for="(item,index) in types"
+                  v-model="item.checked"
+                  :key="index"
+                  :label="item.name"
+                  @change="handleTypes(item,index)"
+                  style="display:block;margin-bottom:10px"
+                ></el-checkbox>
+              </el-dropdown-menu>
+            </el-dropdown>
+          </el-col>
+        </el-col>
+        <!-- 酒店设施 -->
+        <el-col :span="6" class="col-item">
+          <el-col :span="24" class="col-item-second">
+            <span>酒店设施</span>
+            <!-- 双向数据绑定 -->
+          </el-col>
+          <!-- 下拉菜单 -->
+          <el-col :span="24">
+            <el-dropdown placement="bottom-start">
+              <span class="el-dropdown-link link">
+                {{assetsValue}}
+                <i class="el-icon-arrow-down el-icon--right"></i>
+              </span>
+              <el-dropdown-menu slot="dropdown" style="padding:10px">
+                <!-- 循环的数据 -->
+                <el-checkbox
+                  v-for="(item,index) in assets"
+                  v-model="item.checked"
+                  :key="index"
+                  :label="item.name"
+                  @change="handleAssets(item,index)"
+                  style="display:block;margin-bottom:10px"
+                ></el-checkbox>
+              </el-dropdown-menu>
+            </el-dropdown>
+          </el-col>
+        </el-col>
+        <el-col :span="6" class="col-item">
+          <el-col :span="24" class="col-item-second">
+            <span>酒店品牌</span>
+            <!-- 双向数据绑定 -->
+          </el-col>
+          <!-- 下拉菜单 -->
+          <el-col :span="24">
+            <el-dropdown placement="bottom-start">
+              <span class="el-dropdown-link link">
+                {{brandsValue}}
+                <i class="el-icon-arrow-down el-icon--right"></i>
+              </span>
+              <el-dropdown-menu slot="dropdown" style="padding:10px">
+                <!-- 循环的数据 -->
+                <el-checkbox
+                  v-for="(item,index) in brands"
+                  v-model="item.checked"
+                  :key="index"
+                  :label="item.name"
+                  @change="handleBrands(item,index)"
                   style="display:block;margin-bottom:10px"
                 ></el-checkbox>
               </el-dropdown-menu>
@@ -321,6 +392,17 @@ export default {
       peopleNum: "",
 
       //分割线---
+      // 画图的参数
+      //纬度
+      latitude: 0,
+      //经度
+      longitude: 0,
+      //左侧区域列表
+      area: [],
+      // 下拉框的所有值
+      cityList: [],
+
+      //分割线---
       value1: "",
       value2: "",
       time: "",
@@ -328,6 +410,22 @@ export default {
       people: "",
       visible: false,
       price: 0,
+      //分割线--------------
+      //酒店选项
+      levels: [], //等级
+      leveValue: "不限", //星级的下拉文本默认值
+      leveList: [], //星级多选存储
+      types: [], //住宿类型
+      typeValue: "不限", //住宿文本
+      typeList: [], //住宿下拉选项
+      assets: [], //酒店设施
+      assetsValue: "不限",
+      assetsList: [],
+      brands: [], //酒店品牌
+      brandsValue: "不限",
+      brandsList: [],
+      //分割线--------------
+
       hoteltype: [
         {
           label: "酒店等级",
@@ -370,7 +468,6 @@ export default {
           ]
         }
       ],
-      levCommand: [],
       levIndex: 0,
       checked1: true,
       checked2: false,
@@ -395,16 +492,22 @@ export default {
         }
       }).then(res => {
         const { data } = res.data;
+        console.log(data);
+
         const list = data.map(v => {
           v.value = v.name;
           return v;
         });
-
+        this.cityList = list;
         cb(list);
       });
     },
     //城市下拉触发
     handleSelect(item) {
+      console.log(item);
+      this.area = item.scenics;
+      // 存进仓库缓存
+      this.$store.commit("hotel/setArea", this.area);
       this.form.cityName = item.name;
       this.city = item.id;
       // 传递当前form给仓库
@@ -412,6 +515,7 @@ export default {
       const { cityName, ...other } = this.form;
       other.city = this.city;
       this.$store.commit("hotel/setHotelForm", other);
+      this.getList();
       this.$router.push({
         path: "/hotel",
         query: {
@@ -440,9 +544,11 @@ export default {
       });
 
       //将表单存到仓库 此时form城市id值不对
-      const { cityName, ...other } = this.form;
-      other.city = this.city;
-      this.$store.commit("hotel/setHotelForm", other);
+      // const { cityName, ...other } = this.form;
+      // other.city = this.city;
+      // console.log(this.city);
+      // console.log(other);
+      // this.$store.commit("hotel/setHotelForm", other);
     },
 
     //分割线
@@ -453,9 +559,48 @@ export default {
         url: "/hotels",
         params: this.$store.state.hotel.hotelForm
       }).then(res => {
+        console.log(res);
+
         const { data } = res.data;
+
+        // this.latitude = Number(data[0].location.latitude);
+        // this.longitude = Number(data[0].location.longitude);
+        console.log(this.latitude, this.longitude);
+
+        // this.centerLocation = data[0].location;
         // 存进公共仓库
         this.$store.commit("hotel/setHotelList", data);
+        // 重新画图
+        this.getMap();
+      });
+    },
+    // 请求酒店选项
+    getOption() {
+      this.$axios({
+        url: "/hotels/options"
+      }).then(res => {
+        console.log(res);
+        const { levels, types, assets, brands } = res.data.data;
+        // 先给每一个选项添加checked属性 用来筛选的四个值
+        console.log(levels);
+
+        this.levels = levels.map(v => {
+          v.checked = false;
+          return v;
+        });
+        this.types = types.map(v => {
+          v.checked = false;
+          return v;
+        });
+        this.assets = assets.map(v => {
+          v.checked = false;
+          return v;
+        });
+        this.brands = brands.map(v => {
+          v.checked = false;
+          return v;
+        });
+        console.log(this.levels);
       });
     },
     //获取下拉框的index
@@ -463,32 +608,114 @@ export default {
       //外层框的index
       this.levIndex = index;
     },
-    //选择下拉列表
-    handleSelectLev(item1, index) {
-      // 查找是否已有值
-      const res = this.hoteltype[index].selectLev.indexOf(item1.label);
+    //酒店星级筛选
+    handleLeves(item, index) {
+      // console.log(item);
+      //静态样式
+      const res = this.leveList.indexOf(item.name);
       if (res > -1) {
-        // 已有值
-        this.hoteltype[index].selectLev.splice(res, 1);
+        // 已经存在
+        this.leveList.splice(res, 1);
       } else {
-        // 没有值-
-        this.hoteltype[index].selectLev.push(item1.label);
+        //  追加
+        this.leveList.push(item.name);
+      }
+      //r如果长度大于1,修改属性
+      console.log(this.leveList.length);
+      console.log(this.leveList);
+
+      if (this.leveList.length > 1) {
+        this.leveValue = `已选${this.leveList.length}项`;
+      } else {
+        //没有值,或者此时值为1
+        this.leveValue = this.leveList[this.leveList.length - 1];
       }
 
-      //修改不限的值
-      if (this.hoteltype[index].selectLev.length > 1) {
-        this.hoteltype[
-          index
-        ].value = `已选${this.hoteltype[index].selectLev.length}项`;
-      } else {
-        this.hoteltype[index].value = this.hoteltype[index].selectLev[0];
+      if (this.leveList.length === 0) {
+        this.leveValue = "不限";
       }
-      // 判断length是不是为0
-      if (this.hoteltype[index].selectLev.length === 0) {
-        this.hoteltype[index].value = "不限";
+      //筛选功能
+      跳转页面;
+      this.leveList.forEach(v => {
+        // v值:'1星'
+      });
+    },
+    //酒店住宿类型筛选
+    handleTypes(item, index) {
+      console.log(item);
+      const res = this.typeList.indexOf(item.name);
+      if (res > -1) {
+        // 已经存在
+        this.typeList.splice(res, 1);
+      } else {
+        //  追加
+        this.typeList.push(item.name);
+      }
+      //r如果长度大于1,修改属性
+      console.log(this.typeList.length);
+      console.log(this.typeList);
+
+      if (this.typeList.length > 1) {
+        this.typeValue = `已选${this.typeList.length}项`;
+      } else {
+        //没有值,或者此时值为1
+        this.typeValue = this.typeList[this.typeList.length - 1];
+      }
+
+      if (this.typeList.length === 0) {
+        this.typeValue = "不限";
       }
     },
+    //酒店设施筛选
+    handleAssets(item, index) {
+      const res = this.assetsList.indexOf(item.name);
+      if (res > -1) {
+        // 已经存在
+        this.assetsList.splice(res, 1);
+      } else {
+        //  追加
+        this.assetsList.push(item.name);
+      }
+      //r如果长度大于1,修改属性
+      console.log(this.assetsList.length);
+      console.log(this.assetsList);
 
+      if (this.assetsList.length > 1) {
+        this.assetsValue = `已选${this.assetsList.length}项`;
+      } else {
+        //没有值,或者此时值为1
+        this.assetsValue = this.assetsList[this.assetsList.length - 1];
+      }
+
+      if (this.assetsList.length === 0) {
+        this.assetsValue = "不限";
+      }
+    },
+    //酒店品牌筛选
+    handleBrands(item, index) {
+      const res = this.brandsList.indexOf(item.name);
+      if (res > -1) {
+        // 已经存在
+        this.brandsList.splice(res, 1);
+      } else {
+        //  追加
+        this.brandsList.push(item.name);
+      }
+      //r如果长度大于1,修改属性
+      console.log(this.brandsList.length);
+      console.log(this.brandsList);
+
+      if (this.brandsList.length > 1) {
+        this.brandsValue = `已选${this.brandsList.length}项`;
+      } else {
+        //没有值,或者此时值为1
+        this.brandsValue = this.brandsList[this.brandsList.length - 1];
+      }
+
+      if (this.brandsList.length === 0) {
+        this.brandsValue = "不限";
+      }
+    },
     //弹出框
     open() {
       this.$alert(`定位当前城市:${this.mapCity}`, "提示", {
@@ -496,6 +723,8 @@ export default {
         callback: action => {
           // console.log(111);
           // 点击确认的时候用这个城市名请求城市信息
+          console.log(this.mapcity);
+
           this.$axios({
             url: "/cities",
             params: {
@@ -503,6 +732,8 @@ export default {
             }
           }).then(res => {
             const { data } = res.data;
+            console.log(data);
+            this.area = data.scenics;
             data.forEach(v => {
               if (v.name === this.mapCity) {
                 // 备份一份当前的id用作使用
@@ -524,19 +755,34 @@ export default {
     },
     // 画图
     getMap() {
+      // 随机获取一个酒店的地点作为地图的中心点
+      const { location } = this.$store.state.hotel.hotelList[0];
+      this.latitude = location.latitude;
+      this.longitude = location.longitude;
       var map = new AMap.Map("container", {
         zoom: 11, //级别
-        center: [116.397428, 39.90923], //中心点坐标
+        center: [this.longitude, this.latitude], //中心点坐标
         viewMode: "3D", //使用3D视图
         resizeEnable: true
       });
-      //点标记
-      // 根据酒店的数量生成对应的标记标到地图上
-      var marker = new AMap.Marker({
-        position: new AMap.LngLat(113.3245904, 23.1066805), // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
-        title: "广州塔"
+      //点标记 --从仓库循环
+      this.$store.state.hotel.hotelList.forEach((item, index) => {
+        const hotelLatitude = item.location.latitude;
+        const hotelLongitude = item.location.longitude;
+
+        var marker = new AMap.Marker({
+          position: new AMap.LngLat(hotelLongitude, hotelLatitude), // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
+          title: `${item.name}`
+        });
+        map.add(marker);
       });
-      map.add(marker);
+
+      // 根据酒店的数量生成对应的标记标到地图上
+      // var marker = new AMap.Marker({
+      //   // position: new AMap.LngLat(113.3245904, 23.1066805), // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
+      //   // title: "广州塔"
+      // });
+      // map.add(marker);
       //获取当前定位的城市用于显示
       // 获取当前连接是否有query参数cityName值,如果为true,则执行定位
       if (this.$route.query.cityName) return;
@@ -561,10 +807,13 @@ export default {
     if (this.$route.query.cityName && this.form.cityName === "") {
       this.form.cityName = this.$route.query.cityName;
     }
-    this.getMap();
+    // 请求酒店选项
+    this.getOption();
+    // this.getList();
+
     setTimeout(() => {
       // 请求酒店的数据
-      this.getList();
+      this.getMap();
     }, 0);
   }
 };
@@ -592,6 +841,17 @@ export default {
 }
 /deep/.start {
   margin-right: 20px;
+}
+//区域样式
+.area {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  width: 80%;
+  a {
+    display: inline-block;
+  }
 }
 // 地图样式
 #container {
@@ -630,4 +890,12 @@ export default {
 /deep/.el-checkbox__inner {
   border-radius: 50%;
 }
+
+.el-dropdown-menu {
+  max-height: 200px !important;
+  overflow: auto;
+  width: 135px !important;
+}
+
+//标记的样式
 </style>

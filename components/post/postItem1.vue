@@ -28,7 +28,7 @@
 						id:data.id
 					}
 				}" v-for="(item,index) in data.images.slice(0,3)" :key="index">
-					<img class="img2" :src="item">
+					<img class="img2" :src="item" style="object-fit:cover;">
 				</nuxt-link>
 			</div>
 			<div class="item_bottom">
