@@ -12,11 +12,11 @@
     </div>
     <!--   第一个筛选表单 -->
     <div class="filter">
-      <el-form ref="form" :inline="true" :model="form" label-width="80px" v-model="form">
+      <el-form ref="form" :inline="true" :model="pushUrl" label-width="80px" v-model="pushUrl">
         <!-- 城市 -->
         <el-form-item>
           <el-autocomplete
-            v-model="form.cityName"
+            v-model="pushUrl.cityName"
             :fetch-suggestions="querySearch"
             placeholder="切换城市"
             @select="handleSelect"
@@ -317,18 +317,12 @@ import HotelItem from "@/components/hotel/hotelItem";
 export default {
   async beforeRouteUpdate(to, from, next) {
     next();
-    //  重新请求酒店数据
-    this.form.cityName = this.$route.query.cityName;
+
     // this.$store.commit("hotel/setHotelForm", );
-    // 修改query里面的cityName的值
-    const {
-      cityName,
-      hotellevel,
-      hoteltype,
-      hotelasset,
-      hotelbrand,
-      ...other
-    } = this.$route.query;
+    // 修改query里面的cityName的值为city
+    const { cityName, ...other } = this.$route.query;
+    //  重新请求酒店数据
+    this.pushUrl.cityName = cityName;
     // 追加城市信息获取id
     await this.$axios({
       url: "/cities",
@@ -337,18 +331,17 @@ export default {
       }
     }).then(res => {
       const { data } = res.data;
-      if (data.length > 1) {
-      }
+
       data.forEach(v => {
         if (v.name === cityName) {
           other.city = v.id;
         }
       });
       // 处理hotellevel
-      other.hotellevel_in = hotellevel;
-      other.hoteltype_in = hoteltype;
-      other.hotelasset_in = hotelasset;
-      other.hotelbrand_in = hotelbrand;
+      other.hotellevel_in = this.$route.query.hotellevel;
+      other.hoteltype_in = this.$route.query.hoteltype;
+      other.hotelasset_in = this.$route.query.hotelasset;
+      other.hotelbrand_in = this.$route.query.hotelbrand;
     });
     const qs = require("qs");
 
@@ -545,6 +538,9 @@ export default {
       // 弹出框文本
       mapCity: "上海市",
       pushUrl: {
+        cityName: "", //跳转的城市名字,输入框值
+        enterTime: "",
+        leftTime: "",
         price_lt: 4000,
         hotellevel: [],
         hoteltype: [],
@@ -584,18 +580,18 @@ export default {
       this.area = item.scenics;
       // 存进仓库缓存
       this.$store.commit("hotel/setArea", this.area);
-      this.form.cityName = item.name;
+      this.pushUrl.cityName = item.name;
       this.city = item.id;
       // 传递当前form给仓库
       // 修改this.form里面的内容
-      const { cityName, ...other } = this.form;
+      const { cityName, ...other } = this.pushUrl;
       other.city = this.city;
-      this.$store.commit("hotel/setHotelForm", other);
-      this.getList();
+      this.$store.commit("hotel/setPushUrl", other);
+
       this.$router.push({
         path: "/hotel",
         query: {
-          cityName: this.form.cityName
+          cityName
         }
       });
     },
@@ -608,13 +604,13 @@ export default {
     submit() {
       // 处理入店时间和离开事件
       if (!this.time) return;
-      this.form.enterTime = this.time[0];
-      this.form.leftTime = this.time[1];
+      this.pushUrl.enterTime = this.time[0];
+      this.pushUrl.leftTime = this.time[1];
       // 跳转页面
       //
       this.$router.push({
         path: "/hotel",
-        query: this.form
+        query: this.pushUrl
       });
 
       //将表单存到仓库 此时form城市id值不对
@@ -638,23 +634,23 @@ export default {
         return res;
       });
     },
-    getList() {
-      this.$axios({
-        url: "/hotels",
-        params: this.$store.state.hotel.hotelForm
-      }).then(res => {
-        const { data } = res.data;
+    // getList() {
+    //   this.$axios({
+    //     url: "/hotels",
+    //     params: this.$route.query
+    //   }).then(res => {
+    //     const { data } = res.data;
 
-        // this.latitude = Number(data[0].location.latitude);
-        // this.longitude = Number(data[0].location.longitude);
+    //     // this.latitude = Number(data[0].location.latitude);
+    //     // this.longitude = Number(data[0].location.longitude);
 
-        // this.centerLocation = data[0].location;
-        // 存进公共仓库
-        this.$store.commit("hotel/setHotelList", data);
-        // 重新画图
-        this.getMap();
-      });
-    },
+    //     // this.centerLocation = data[0].location;
+    //     // 存进公共仓库
+    //     this.$store.commit("hotel/setHotelList", data);
+    //     // 重新画图
+    //     this.getMap();
+    //   });
+    // },
     // 请求酒店选项
     getOption() {
       this.$axios({
@@ -878,21 +874,14 @@ export default {
           }).then(res => {
             const { data } = res.data;
             this.area = data.scenics;
-            data.forEach(v => {
-              if (v.name === this.mapCity) {
-                // 备份一份当前的id用作使用
-                this.cityId = v.id;
-                this.$store.commit("hotel/setHotelFormCity", v.id);
-                this.getList();
-              }
-            });
           });
-
+          this.pushUrl.cityName = this.mapCity;
+          const { cityName } = this.pushUrl;
           //跳转到cityname
           this.$router.push({
             path: "/hotel",
             query: {
-              cityName: this.mapCity
+              cityName
             }
           });
           if (this.$route.query.cityName && this.form.cityName === "") {
@@ -968,6 +957,8 @@ export default {
     }
   },
   mounted() {
+    // 请求酒店选项
+    this.getOption();
     this.pushUrl.price_lt = this.price;
     if (!this.$route.query.cityName) {
       //定位
@@ -979,8 +970,6 @@ export default {
     if (this.$route.query.cityName && this.form.cityName === "") {
       this.form.cityName = this.$route.query.cityName;
     }
-    // 请求酒店选项
-    this.getOption();
   }
 };
 </script>
@@ -1066,5 +1055,6 @@ export default {
   padding: 30px 0;
   text-align: center;
 }
+
 //标记的样式
 </style>

@@ -30,10 +30,7 @@ export default {
   /*
    ** Global CSS
    */
-  css: [
-    "element-ui/lib/theme-chalk/index.css",
-    "assets/main.css"
-  ],
+  css: ["element-ui/lib/theme-chalk/index.css", "assets/main.css"],
   /*
    ** Plugins to load before mounting the App
    */
@@ -59,8 +56,8 @@ export default {
    ** See https://axios.nuxtjs.org/options
    */
   axios: {
-    baseURL: "http://127.0.0.1:1337"
-    // baseURL: " http://157.122.54.189:9095"
+    // baseURL: "http://127.0.0.1:1337"
+    baseURL: " http://157.122.54.189:9095"
   },
   /*
    ** Build configuration
@@ -70,6 +67,6 @@ export default {
     /*
      ** You can extend webpack config here
      */
-    extend(config, ctx) { }
+    extend(config, ctx) {}
   }
 };
