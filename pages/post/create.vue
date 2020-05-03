@@ -14,19 +14,27 @@
         <!-- 富文本编辑器 -->
         <el-form-item prop="content">
           <no-ssr placeholder="Loading Your Editor...">
-            <vue-editor v-model="form.content"></vue-editor>
+            <vue-editor placeholder="......" v-model="form.content"></vue-editor>
           </no-ssr>
         </el-form-item>
 
         <el-form-item label="选择城市" prop="city">
-          <el-input placeholder="请搜索游玩城市" class="inp-city" v-model="form.city"></el-input>
+          <!-- 带输入建议输入框 -->
+          <el-autocomplete
+            :fetch-suggestions="queryCity"
+            placeholder="请搜索游玩城市"
+            @select="handleCitySelect"
+            class="el-autocomplete"
+            v-model="form.city"
+            @blur="handleCity"
+          ></el-autocomplete>
         </el-form-item>
 
         <el-form-item>
           <div class="publish">
             <el-button type="primary" class="btn-publish" @click="handleCreate()">发布</el-button>
             <span class="or">或者</span>
-            <a href="#" class="save">保存到草稿</a>
+            <a href="javascript:;" class="save" @click="saveDraft()">保存到草稿</a>
           </div>
         </el-form-item>
       </el-form>
@@ -39,6 +47,7 @@
 
 <script>
 import createAside from "@/components/post/createAside";
+import moment from "moment";
 export default {
   components: {
     createAside
@@ -90,25 +99,104 @@ export default {
         title: [{ validator: validateTitle, trigger: "blur1" }],
         content: [{ validator: validateContent, trigger: "blur1" }],
         city: [{ validator: validateCity, trigger: "blur1" }]
-      }
+      },
+      citys: [] // 存储游玩城市 下拉列表的数据
     };
   },
   methods: {
-    // 点击发布按钮时触发
-    handleCreate() {
-      // console.log(this.$refs.form);
-      this.$refs.form.validate(valid => {
-        if (valid) {
-          console.log(this.form);
-        }
-      });
-    },
     // 标题不能为空 错误信息弹窗提示方法
     validateError(str) {
       this.$alert(`请填写` + str, "提示", {
         confirmButtonText: "确定",
         type: "warning"
       });
+    },
+    //封装搜索城市方法
+    getCities(value) {
+      return this.$axios({
+        url: "/airs/city",
+        params: {
+          name: value
+        }
+      }).then(res => {
+        // console.log(res);
+        const { data } = res.data;
+        // cb这个参数是一个方法,需要传参,参数需要有value属性,
+        // 遍历data给把每一个元素的name值赋给 value属性
+        const cites = data.map(v => {
+          // v.value = v.name.replace("市", "");
+          v.value = v.name;
+          return v;
+        });
+        // console.log(cites);
+        return cites;
+      });
+    },
+
+    // 点击发布按钮时触发
+    handleCreate() {
+      // console.log(this.$refs.form);
+      this.$refs.form.validate(valid => {
+        if (valid) {
+          // console.log(this.form);
+          // 新增文章请求
+          this.$axios({
+            url: "/posts",
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ` + this.$store.state.user.userInfo.token
+            },
+            data: this.form
+          }).then(res => {
+            const { data } = res.data;
+            // console.log(data);
+
+            this.$message({
+              message: "新增成功",
+              type: "success"
+            });
+          });
+        }
+      });
+    },
+
+    // 游玩城市 输入框获得焦点时触发
+    // value 是选中的值，cb是回调函数，接收要展示的城市
+    queryCity(value, cb) {
+      // value的值是输入框的值，非空的时候
+      if (!value) {
+        cb([]);
+        this.citys = [];
+        return;
+      }
+
+      this.getCities(value).then(res => {
+        // res的值为函数中return出来的cites
+        this.citys = res;
+        cb(res);
+      });
+    },
+
+    // 游玩城市 输入框下拉 选定选项时触发
+    handleCitySelect(item) {
+      // console.log(item);
+    },
+
+    // 游玩城市 输入框 失去焦点时触发  自动匹配第一项
+    handleCity() {
+      if (this.citys.length > 0) {
+        this.form.city = this.citys[0].value;
+      }
+    },
+
+    // 保存到草稿箱
+    saveDraft() {
+      // 将表单信息存储到store的仓库中
+      const time = moment().format("YYYY-MM-DD");
+      this.form.timeDate = time;
+      // console.log(this.form);
+
+      this.$store.commit("post/setDraftList", this.form);
     }
   }
 };
@@ -139,9 +227,9 @@ export default {
   /deep/ #quill-container {
     height: 400px;
   }
-  .inp-city {
-    width: 202px;
-  }
+  // .inp-city {
+  //   width: 202px;
+  // }
 
   .publish {
     .btn-publish {

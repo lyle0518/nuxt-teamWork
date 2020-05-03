@@ -4,33 +4,35 @@
       <!-- 左内容 -->
       <el-col :span="16">
         <div class="grid-content bg-purple">
-          <!-- 面包屑导航 -->
-          <el-breadcrumb separator="/">
-            <el-breadcrumb-item :to="{ path:'/post' }">旅游攻略</el-breadcrumb-item>
-            <el-breadcrumb-item>攻略详情</el-breadcrumb-item>
-          </el-breadcrumb>
-          <!--  头部-->
-          <h1 class="title">{{detail.title}}</h1>
-          <!-- 阅读量、时间 -->
-          <el-col :span="24" class="text">
-            <span>攻略：{{detail.created_at}}</span>
-            <span>阅读：{{detail.watch}}</span>
-          </el-col>
-          <!-- 文章内容 -->
-          <div class="postContent" v-html="detail.content"></div>
-          <!-- 评论、分享 按钮 -->
-          <div class="share">
-            <div class="share-item">
-              <a href="javascript:;">
-                <i class="el-icon-edit-outline"></i>
-                <p>评论({{postCommentsData.length}})</p>
-              </a>
-            </div>
-            <div class="share-item">
-              <a href="javascript:;" @click="$message({message:'暂不支持分享',type:'warning'})">
-                <i class="el-icon-share"></i>
-                <p>分享</p>
-              </a>
+          <div ref="srcollHight">
+            <!-- 面包屑导航 -->
+            <el-breadcrumb separator="/">
+              <el-breadcrumb-item :to="{ path:'/post' }">旅游攻略</el-breadcrumb-item>
+              <el-breadcrumb-item>攻略详情</el-breadcrumb-item>
+            </el-breadcrumb>
+            <!--  头部-->
+            <h1 class="title">{{detail.title}}</h1>
+            <!-- 阅读量、时间 -->
+            <el-col :span="24" class="text">
+              <span>攻略：{{detail.created_at}}</span>
+              <span>阅读：{{detail.watch}}</span>
+            </el-col>
+            <!-- 文章内容 -->
+            <div class="postContent" v-html="detail.content"></div>
+            <!-- 评论、分享 按钮 -->
+            <div class="share">
+              <div class="share-item">
+                <a href="javascript:;">
+                  <i class="el-icon-edit-outline"></i>
+                  <p>评论({{postCommentsData.length}})</p>
+                </a>
+              </div>
+              <div class="share-item">
+                <a href="javascript:;" @click="$message({message:'暂不支持分享',type:'warning'})">
+                  <i class="el-icon-share"></i>
+                  <p>分享</p>
+                </a>
+              </div>
             </div>
           </div>
 
@@ -176,7 +178,8 @@ export default {
       //页面地址栏变化时重新请求数据
       this.getPostData();
       this.getCommentsData();
-    }
+    },
+    replySwith() {}
   },
   mounted() {
     this.getPostData();
@@ -247,7 +250,7 @@ export default {
       //将回复ID清空
       this.form.follow = "";
     },
-    //子组件传值事件
+    //子组件传值事件 (回复按钮)
     handleReply(data) {
       //存值 到data
       this.replyData = data;
@@ -255,6 +258,8 @@ export default {
       this.form.follow = this.replyData.id;
       //显示 @用户名 标签
       this.replySwith = true;
+      //滚动条跳到评论区 区域
+      window.scrollTo(0, this.$refs.srcollHight.scrollHeight);
     },
     //提交评论
     submitComment() {
@@ -383,11 +388,10 @@ export default {
     }
     // 评论/分享 按钮
     .share {
-      display: flex;
-      align-items: center;
-      justify-content: center;
       padding: 50px 0;
+      text-align: center;
       .share-item {
+        display: inline-block;
         margin: 0 20px;
         text-align: center;
         .el-icon-edit-outline,
@@ -465,7 +469,7 @@ export default {
         }
       }
       .right {
-        min-height: 40px;
+        min-height: 45px;
         h4 {
           position: absolute;
           top: 20px;
