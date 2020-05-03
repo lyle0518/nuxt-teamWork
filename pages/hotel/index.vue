@@ -8,7 +8,7 @@
       <!-- 修改:要用图标分隔符 -->
       <nuxt-link to="#">酒店</nuxt-link>
       <span>></span>
-      <nuxt-link to="#">酒店预订</nuxt-link>
+      <nuxt-link to="#">{{title}}</nuxt-link>
     </div>
     <!--   第一个筛选表单 -->
     <div class="filter">
@@ -327,6 +327,11 @@ export default {
     const { cityName, ...other } = this.$route.query;
     //  重新请求酒店数据
     this.pushUrl.cityName = cityName;
+    // 页面发生跳转获取cityName值修改title的值
+    if (cityName) {
+      this.title = `${cityName}酒店预订`;
+    }
+    let title = `${this.$store.state.hotel.title}`;
     // 追加城市信息获取id
     await this.$axios({
       url: "/cities",
@@ -385,11 +390,13 @@ export default {
 
     // this.getList();
   },
+
   components: {
     HotelItem
   },
   data() {
     return {
+      title: "酒店预订",
       //条数
       _limit: 1,
       //开始页数
@@ -940,22 +947,22 @@ export default {
     // 定位
     getLocation() {
       // 如果地址没有城市则触发
-        var citysearch = new AMap.CitySearch();
-        citysearch.getLocalCity((status, result) => {
-          if (status === "complete" && result.info === "OK") {
-            if (result && result.city && result.bounds) {
-              var cityinfo = result.city;
-              var citybounds = result.bounds;
-              //弹出框
-              // cityinfo --当前城市
-              // 定位发送城市的请求
-              const data = this.getCity(cityinfo);
+      var citysearch = new AMap.CitySearch();
+      citysearch.getLocalCity((status, result) => {
+        if (status === "complete" && result.info === "OK") {
+          if (result && result.city && result.bounds) {
+            var cityinfo = result.city;
+            var citybounds = result.bounds;
+            //弹出框
+            // cityinfo --当前城市
+            // 定位发送城市的请求
+            const data = this.getCity(cityinfo);
 
-              this.mapCity = cityinfo;
-              this.getMap();
-              this.open();
-            }
+            this.mapCity = cityinfo;
+            this.getMap();
+            this.open();
           }
+        }
       });
     }
   },
@@ -964,22 +971,23 @@ export default {
     setTimeout(() => {
       console.log(this.$store.state.hotel.hotelList);
       this.getMap();
-    }, 1000);
+    }, 10);
 
     // 请求酒店选项
     this.getOption();
     this.pushUrl.price_lt = this.price;
     console.log(this.$route.query.cityName);
-
-    if (!this.$route.query.cityName) {
-      //定位
+    // 处理页面刷新是的title的值
+    const { cityName, ...other } = this.$route.query;
+    if (cityName) {
+      this.title = `${cityName}酒店预订`;
+    } else {
+      //cityName没有值---触发定位
       setTimeout(() => {
         this.getLocation();
-        console.log("定位");
       }, 1000);
-      console.log("定位");
     }
-    console.log("改值");
+
     if (this.$route.query.cityName && this.pushUrl.cityName === "") {
       this.pushUrl.cityName = this.$route.query.cityName;
     }
