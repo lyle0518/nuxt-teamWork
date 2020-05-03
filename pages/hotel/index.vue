@@ -308,6 +308,10 @@
     <el-row class="none" v-else>
       <p>暂无符合条件的酒店</p>
     </el-row>
+    <!-- 分页器 -->
+    <el-row v-if="$store.state.hotel.hotelList.length > 0">
+      <el-pagination layout="prev, pager, next" :pager-count="5" :total="total"></el-pagination>
+    </el-row>
   </div>
 </template>
 
@@ -386,15 +390,6 @@ export default {
   },
   data() {
     return {
-      //第一个删选框的参数
-      form: {
-        //切换城市value值
-        cityName: "",
-        //入店时间
-        enterTime: "",
-        //;离店
-        leftTime: ""
-      },
       //条数
       _limit: 1,
       //开始页数
@@ -537,6 +532,7 @@ export default {
       checked2: false,
       // 弹出框文本
       mapCity: "上海市",
+      total: 0,
       pushUrl: {
         cityName: "", //跳转的城市名字,输入框值
         enterTime: "",
@@ -549,9 +545,7 @@ export default {
       } //筛选框用于跳转的地址
     };
   },
-  destroyed() {
-    this.getList();
-  },
+
   methods: {
     //筛选框的方法
     querySearch(value, cb) {
@@ -675,9 +669,9 @@ export default {
           v.checked = false;
           return v;
         });
-        console.log(this.types);
-        console.log(this.assets);
-        console.log(this.brands);
+        // console.log(this.types);
+        // console.log(this.assets);
+        // console.log(this.brands);
       });
     },
     //获取下拉框的index
@@ -893,7 +887,11 @@ export default {
     // 生成地图
     getMap() {
       // 随机获取一个酒店的地点作为地图的中心点
+
       if (this.$store.state.hotel.hotelList.length > 1) {
+        console.log("触发了长度大于1");
+        console.log(this.$store.state.hotel.hotelList[0].location.latitude);
+
         this.$store.commit(
           "hotel/setLatitude",
           this.$store.state.hotel.hotelList[0].location.latitude
@@ -903,6 +901,11 @@ export default {
           this.$store.state.hotel.hotelList[0].location.longitude
         );
       }
+
+      console.log(
+        this.$store.state.hotel.longitude,
+        this.$store.state.hotel.latitude
+      );
 
       var map = new AMap.Map("container", {
         zoom: 11, //级别
@@ -937,39 +940,50 @@ export default {
     // 定位
     getLocation() {
       // 如果地址没有城市则触发
-      var citysearch = new AMap.CitySearch();
-      citysearch.getLocalCity((status, result) => {
-        if (status === "complete" && result.info === "OK") {
-          if (result && result.city && result.bounds) {
-            var cityinfo = result.city;
-            var citybounds = result.bounds;
-            //弹出框
-            // cityinfo --当前城市
-            // 定位发送城市的请求
-            const data = this.getCity(cityinfo);
+        var citysearch = new AMap.CitySearch();
+        citysearch.getLocalCity((status, result) => {
+          if (status === "complete" && result.info === "OK") {
+            if (result && result.city && result.bounds) {
+              var cityinfo = result.city;
+              var citybounds = result.bounds;
+              //弹出框
+              // cityinfo --当前城市
+              // 定位发送城市的请求
+              const data = this.getCity(cityinfo);
 
-            this.mapCity = cityinfo;
-            this.getMap();
-            this.open();
+              this.mapCity = cityinfo;
+              this.getMap();
+              this.open();
+            }
           }
-        }
       });
     }
   },
   mounted() {
+    // 刷新进来的时候通过url请求数据
+    setTimeout(() => {
+      console.log(this.$store.state.hotel.hotelList);
+      this.getMap();
+    }, 1000);
+
     // 请求酒店选项
     this.getOption();
     this.pushUrl.price_lt = this.price;
+    console.log(this.$route.query.cityName);
+
     if (!this.$route.query.cityName) {
       //定位
-      setTimeout(async () => {
-        await this.getMap();
-        await this.getLocation();
-      }, 0);
+      setTimeout(() => {
+        this.getLocation();
+        console.log("定位");
+      }, 1000);
+      console.log("定位");
     }
-    if (this.$route.query.cityName && this.form.cityName === "") {
-      this.form.cityName = this.$route.query.cityName;
+    console.log("改值");
+    if (this.$route.query.cityName && this.pushUrl.cityName === "") {
+      this.pushUrl.cityName = this.$route.query.cityName;
     }
+    console.log(111);
   }
 };
 </script>
