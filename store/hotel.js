@@ -1,9 +1,9 @@
 export const state = function() {
   return {
     hotelList: "",
-    hotelForm: {
+    pushUrl: {
       //切换城市
-      city: "",
+      cityName: "",
       //入店时间
       enterTime: "",
       //离店
@@ -20,7 +20,7 @@ export const mutations = {
   setHotelList(state, data) {
     state.hotelList = data;
   },
-  setHotelForm(state, data) {
+  setPushUrl(state, data) {
     state.hotelForm = data;
   },
   setHotelFormCity(state, data) {
