@@ -8,7 +8,7 @@
       <!-- 修改:要用图标分隔符 -->
       <nuxt-link to="#">酒店</nuxt-link>
       <span>></span>
-      <nuxt-link to="#">酒店预订</nuxt-link>
+      <nuxt-link to="#">{{title}}</nuxt-link>
     </div>
     <!--   第一个筛选表单 -->
     <div class="filter">
@@ -90,18 +90,28 @@
       </el-form>
     </div>
     <!-- 地图部分 -->
-    <el-row style="height:260px">
+    <el-row>
       <el-col :span="14">
         <div class="left">
           <el-row style="margin-bottom:20px">
             <el-col :span="3">区域:</el-col>
-            <el-col :span="21" class="area">
+            <el-col :span="21">
               <!-- 需要循环处理的数据 -->
-              <a
-                href="#"
-                v-for="(item, index) in $store.state.hotel.area"
-                :key="index"
-              >{{ item.name }}</a>
+              <div class="area" :style="`height:${height}`">
+                <a
+                  href="#"
+                  v-for="(item, index) in $store.state.hotel.area"
+                  :key="index"
+                  class="hotLocation"
+                >{{ item.name }}</a>
+              </div>
+
+              <div class="clickLocation" @click="clickLocation">
+                <i class="el-icon-d-arrow-left iconBottom" v-if="show"></i>
+                <i class="el-icon-d-arrow-left iconTop" v-else></i>
+
+                <span>等{{$store.state.hotel.area.length}}个区域</span>
+              </div>
             </el-col>
           </el-row>
           <el-row>
@@ -308,6 +318,10 @@
     <el-row class="none" v-else>
       <p>暂无符合条件的酒店</p>
     </el-row>
+    <!-- 分页器 -->
+    <el-row v-if="$store.state.hotel.hotelList.length > 0" class="page">
+      <el-pagination layout="prev, pager, next" :pager-count="5" :total="total"></el-pagination>
+    </el-row>
   </div>
 </template>
 
@@ -323,6 +337,11 @@ export default {
     const { cityName, ...other } = this.$route.query;
     //  重新请求酒店数据
     this.pushUrl.cityName = cityName;
+    // 页面发生跳转获取cityName值修改title的值
+    if (cityName) {
+      this.title = `${cityName}酒店预订`;
+    }
+    let title = `${this.$store.state.hotel.title}`;
     // 追加城市信息获取id
     await this.$axios({
       url: "/cities",
@@ -381,20 +400,13 @@ export default {
 
     // this.getList();
   },
+
   components: {
     HotelItem
   },
   data() {
     return {
-      //第一个删选框的参数
-      form: {
-        //切换城市value值
-        cityName: "",
-        //入店时间
-        enterTime: "",
-        //;离店
-        leftTime: ""
-      },
+      title: "酒店预订",
       //条数
       _limit: 1,
       //开始页数
@@ -454,7 +466,9 @@ export default {
       value2: "",
       // 乘车框value值
       peopleNum: "",
-
+      //区域的参数
+      show: true,
+      height: "36px",
       //分割线---
       // 画图的参数
       //纬度
@@ -537,6 +551,7 @@ export default {
       checked2: false,
       // 弹出框文本
       mapCity: "上海市",
+      total: 0,
       pushUrl: {
         cityName: "", //跳转的城市名字,输入框值
         enterTime: "",
@@ -549,9 +564,7 @@ export default {
       } //筛选框用于跳转的地址
     };
   },
-  destroyed() {
-    this.getList();
-  },
+
   methods: {
     //筛选框的方法
     querySearch(value, cb) {
@@ -651,6 +664,16 @@ export default {
     //     this.getMap();
     //   });
     // },
+    //控制区域显示数量
+    clickLocation() {
+      this.show = !this.show;
+      // 判断show值操控dom元素的高度
+      if (this.show) {
+        this.height = "36px";
+      } else {
+        this.height = "";
+      }
+    },
     // 请求酒店选项
     getOption() {
       this.$axios({
@@ -675,9 +698,9 @@ export default {
           v.checked = false;
           return v;
         });
-        console.log(this.types);
-        console.log(this.assets);
-        console.log(this.brands);
+        // console.log(this.types);
+        // console.log(this.assets);
+        // console.log(this.brands);
       });
     },
     //获取下拉框的index
@@ -893,7 +916,11 @@ export default {
     // 生成地图
     getMap() {
       // 随机获取一个酒店的地点作为地图的中心点
+
       if (this.$store.state.hotel.hotelList.length > 1) {
+        console.log("触发了长度大于1");
+        console.log(this.$store.state.hotel.hotelList[0].location.latitude);
+
         this.$store.commit(
           "hotel/setLatitude",
           this.$store.state.hotel.hotelList[0].location.latitude
@@ -903,6 +930,11 @@ export default {
           this.$store.state.hotel.hotelList[0].location.longitude
         );
       }
+
+      console.log(
+        this.$store.state.hotel.longitude,
+        this.$store.state.hotel.latitude
+      );
 
       var map = new AMap.Map("container", {
         zoom: 11, //级别
@@ -957,19 +989,31 @@ export default {
     }
   },
   mounted() {
+    // 刷新进来的时候通过url请求数据
+    setTimeout(() => {
+      console.log(this.$store.state.hotel.hotelList);
+      this.getMap();
+    }, 500);
+
     // 请求酒店选项
     this.getOption();
     this.pushUrl.price_lt = this.price;
-    if (!this.$route.query.cityName) {
-      //定位
-      setTimeout(async () => {
-        await this.getMap();
-        await this.getLocation();
-      }, 0);
+    console.log(this.$route.query.cityName);
+    // 处理页面刷新是的title的值
+    const { cityName, ...other } = this.$route.query;
+    if (cityName) {
+      this.title = `${cityName}酒店预订`;
+    } else {
+      //cityName没有值---触发定位
+      setTimeout(() => {
+        this.getLocation();
+      }, 1000);
     }
-    if (this.$route.query.cityName && this.form.cityName === "") {
-      this.form.cityName = this.$route.query.cityName;
+
+    if (this.$route.query.cityName && this.pushUrl.cityName === "") {
+      this.pushUrl.cityName = this.$route.query.cityName;
     }
+    console.log(111);
   }
 };
 </script>
@@ -999,20 +1043,32 @@ export default {
 }
 //区域样式
 .area {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+  line-height: 18px;
+
   overflow: hidden;
-  width: 80%;
+
   a {
     display: inline-block;
   }
 }
+.clickLocation {
+  cursor: pointer;
+  .iconBottom {
+    color: #f90;
+    transform: rotate(-90deg);
+  }
+  .iconTop {
+    color: #f90;
+    transform: rotate(90deg);
+  }
+}
+
 // 地图样式
 #container {
   width: 420px;
   height: 260px;
 }
+
 .filter2 {
   border: 1px solid #ddd;
   margin: 10px 0;
@@ -1055,6 +1111,9 @@ export default {
   padding: 30px 0;
   text-align: center;
 }
-
+.page {
+  text-align: right;
+  margin: 30px 0;
+}
 //标记的样式
 </style>

@@ -54,9 +54,10 @@
 					<postItem3 v-if="item.images.length === 0" :data="item"></postItem3>
 				</div>
 				<el-pagination
+					v-if="pageShow"
 					@size-change="handleSizeChange"
 					@current-change="handleCurrentChange"
-					:current-page="pageIndex"
+					:current-page.sync="pageIndex"
 					:page-sizes="[3, 5, 10, 15]"
 					:page-size="pageSize"
 					layout="total, sizes, prev, pager, next, jumper"
@@ -88,30 +89,97 @@ export default {
 			indexs: '',
 			likeList: [],
 			indexss: 0,
-			totals: 0
+			totals: 0,
+			pageShow:false
 		};
 	},
-	mounted() {
-		this.$router.push({
-			// path:'/post',
-			query: {
-				start: 0,
-				limit: 3
+	beforeRouteEnter (to, from, next) {
+		console.log(from)
+		if(from.path !== '/post/detail'){
+		next(vm => {
+				vm.pageIndex = 1
+				vm.request()
+		})
+		}else{
+			next()
+		}
+	},
+	watch:{
+		'$route.query'(){
+			// console.log(this.$route.query)
+			if(this.$route.query.start === '0' && this.$route.query.limit === '3'){
+				this.pageIndex = 1
+				this.$store.commit('post/setcurrentIndex',1)
+				this.request()
 			}
+		}
+	},
+	mounted() {
+		const limits = this.$route.query.limit
+		const cityss = this.$route.query.city
+		console.log(!cityss)
+		if(this.$route.query.start === '0' && +limits >= 3 && !cityss){
+			this.$store.commit('post/setcurrentIndex',1)
+			this.$store.commit('post/setcurrentSize',3)
+			this.$store.commit('post/setCity','')
+		}
+		this.city = this.$store.state.post.city
+		this.pageIndex = this.$store.state.post.currentIndex || 1
+		this.pageSize = this.$store.state.post.currentSize || 3
+		this.pageShow = true
+		
+		const datas = {
+			url: '/posts'
+		};
+		if (this.city.trim() !== '' || this.$store.state.post.city !== '') {
+			this.$store.commit('post/setCity',this.city)
+			datas.params = {
+				city: this.city,
+				_start: (this.pageIndex - 1) * this.pageSize,
+				_limit: this.pageSize
+			}
+			this.$router.push({
+				query: {
+					start: 0,
+					limit: 3,
+					city:this.$store.state.post.city
+				}
+			});
+		} else {
+			datas.params = {
+				_start: (this.pageIndex - 1) * this.pageSize,
+				_limit: this.pageSize
+			}
+			this.$router.push({
+				query: {
+					start: 0,
+					limit: 3
+				}
+			});
+		}
+		this.$axios(datas).then(res => {
+			this.totals = res.data.total;
+			const { data } = res.data;
+			this.lists = data;
 		});
-		this.request();
+		
+		
 		this.$axios({
 			url: '/posts/cities'
 		}).then(res => {
-			console.log(res);
+			// console.log(res);
 			const { data } = res.data;
 			this.likeList = data;
-		});
+		});	
 	},
 	methods: {
 		back() {
 			this.city = '';
 			this.pageIndex = 1;
+			this.pageSize = 3
+			this.$store.commit('post/setcurrentIndex',1)
+			this.$store.commit('post/setcurrentSize',3)
+			this.$store.commit('post/setCity','')
 			this.request();
 		},
 		request() {
@@ -149,25 +217,30 @@ export default {
 				const { data } = res.data;
 				this.lists = data;
 				// this.list = data.slice((this.pageIndex - 1 )* this.pageSize,this.pageIndex * this.pageSize);
-				// console.log(this.list);
 			});
 		},
 		recommedCity(data) {
 			this.city = data;
+			this.$store.commit('post/setCity',data)
 			this.pageIndex = 1;
 			this.request();
 		},
 		handleSizeChange(val) {
 			this.pageIndex = 1;
+			this.$store.commit('post/setcurrentIndex',1)
+			this.$store.commit('post/setcurrentSize',val)
 			this.pageSize = val;
 			this.request();
 		},
 		handleCurrentChange(val) {
 			this.pageIndex = val;
+			this.$store.commit('post/setcurrentIndex',val)
 			this.request();
 		},
 		handSearch() {
+			this.$store.commit('post/setCity',this.city)
 			this.pageIndex = 1;
+			this.$store.commit('post/setcurrentIndex',1)
 			this.request();
 		},
 		han(val) {
@@ -180,8 +253,10 @@ export default {
 			this.indexss = 0;
 		},
 		recommed(city) {
+			this.$store.commit('post/setCity',city)
 			this.city = city;
 			this.pageIndex = 1;
+			this.$store.commit('post/setcurrentIndex',1)
 			this.request();
 		}
 	}
