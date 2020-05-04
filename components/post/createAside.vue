@@ -2,26 +2,13 @@
   <div class="aside clearfix">
     <div class="draft">
       <h4 class="draft-title">草稿箱 ( 5 )</h4>
-      <div class="draf-list">
+      <div class="draf-list" v-for="(item,index) in this.$store.state.post.draftList" :key="index">
         <div class="draf-item">
-          <span>闲云旅游1</span>
-          <i class="el-icon-edit draf-icon"></i>
-          <p class="draf-date">2020-05-01</p>
-        </div>
-        <div class="draf-item">
-          <span>闲云旅游2</span>
-          <i class="el-icon-edit draf-icon"></i>
-          <p class="draf-date">2020-05-01</p>
-        </div>
-        <div class="draf-item">
-          <span>闲云旅游3</span>
-          <i class="el-icon-edit draf-icon"></i>
-          <p class="draf-date">2020-05-01</p>
-        </div>
-        <div class="draf-item">
-          <span></span>
-          <i class="el-icon-edit draf-icon"></i>
-          <p class="draf-date">2020-05-01</p>
+          <span class="draf-title textone" @click="handleClick(item)">
+            {{item.title}}
+            <i class="el-icon-edit draf-icon"></i>
+          </span>
+          <p class="draf-date">{{item.timeDate}}</p>
         </div>
       </div>
     </div>
@@ -29,7 +16,13 @@
 </template>
 
 <script>
-export default {};
+export default {
+  methods: {
+    handleClick(item) {
+      console.log(item);
+    }
+  }
+};
 </script>
 
 <style scoped lang="less">
@@ -47,9 +40,31 @@ export default {};
     .draf-item {
       margin-bottom: 10px;
       font-size: 14px;
-      .draf-icon {
-        font-size: 16px;
+      .draf-title {
+        .draf-icon {
+          font-size: 16px;
+          &:hover {
+            color: #ffa500;
+            cursor: pointer;
+          }
+        }
+        &:hover {
+          color: #ffa500;
+          text-decoration: underline;
+          cursor: pointer;
+        }
       }
+      //标题一行文字溢出隐藏
+      .textone {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        line-height: 20px;
+        max-height: 20px;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+      }
+
       .draf-date {
         color: #999;
       }

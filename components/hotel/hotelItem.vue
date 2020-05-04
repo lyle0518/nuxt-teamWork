@@ -93,7 +93,9 @@ export default {
     padding-right: 10px;
     a {
       img {
-        width: 100%;
+        width: 323px;
+        height: 198px;
+        object-fit: cover;
       }
     }
   }
