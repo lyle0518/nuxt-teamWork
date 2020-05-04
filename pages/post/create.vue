@@ -78,6 +78,30 @@ export default {
     };
   },
   data() {
+    // 标题不能为空
+    var validateTitle = (rule, value, callback) => {
+      if (value === "") {
+        callback(new Error(this.validateError("标题")));
+      } else {
+        callback();
+      }
+    };
+    // 内容不能为空
+    var validateContent = (rule, value, callback) => {
+      if (this.form.title !== "" && value === "") {
+        callback(new Error(this.validateError("内容")));
+      } else {
+        callback();
+      }
+    };
+    // 城市不能为空
+    var validateCity = (rule, value, callback) => {
+      if (this.form.title !== "" && this.form.content !== "" && value === "") {
+        callback(new Error(this.validateError("城市")));
+      } else {
+        callback();
+      }
+    };
     return {
       form: {
         title: "",
@@ -86,14 +110,22 @@ export default {
       },
       // 表单验证规则
       rules: {
-        title: [{ required: true, message: "标题不能为空" }],
-        content: [{ required: true, message: "内容不能为空" }],
-        city: [{ required: true, message: "城市不能为空" }]
+        title: [{ validator: validateTitle, trigger: "blur1" }],
+        content: [{ validator: validateContent, trigger: "blur1" }],
+        city: [{ validator: validateCity, trigger: "blur1" }]
       },
       citys: [] // 存储游玩城市 下拉列表的数据
     };
   },
   methods: {
+    // 标题不能为空 错误信息弹窗提示方法
+    validateError(str) {
+      this.$alert(`请填写` + str, "提示", {
+        confirmButtonText: "确定",
+        type: "warning"
+      });
+    },
+
     //封装搜索城市方法
     getCities(value) {
       return this.$axios({
@@ -118,7 +150,7 @@ export default {
 
     // 点击发布按钮时触发
     handleCreate() {
-      // console.log(this.form);
+      console.log(this.form);
       this.$refs.form.validate(valid => {
         if (valid) {
           // 新增文章请求
@@ -135,15 +167,19 @@ export default {
             }
           }).then(res => {
             const { data } = res.data;
-            console.log(data);
+            console.log(res);
+            // if (res.statusCode === 400) {
+            // axios.js的400编码错误信息提示 注释起来了
+            //   Message.error(message);
+            // }
             this.$message({
               message: "新增成功",
               type: "success"
             });
             // 清空表单内容
-            // this.form.title = "";
-            // this.form.content = "";
-            // this.form.city = "";
+            this.form.title = "";
+            this.form.content = "";
+            this.form.city = "";
           });
         }
       });

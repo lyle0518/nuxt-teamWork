@@ -81,7 +81,7 @@ export default {
     // 标题不能为空
     var validateTitle = (rule, value, callback) => {
       if (value === "") {
-        callback(this.validateError("标题"));
+        callback(new Error(this.validateError("标题")));
       } else {
         callback();
       }
@@ -89,7 +89,7 @@ export default {
     // 内容不能为空
     var validateContent = (rule, value, callback) => {
       if (this.form.title !== "" && value === "") {
-        callback(this.validateError("内容"));
+        callback(new Error(this.validateError("内容")));
       } else {
         callback();
       }
@@ -97,7 +97,7 @@ export default {
     // 城市不能为空
     var validateCity = (rule, value, callback) => {
       if (this.form.title !== "" && this.form.content !== "" && value === "") {
-        callback(this.validateError("城市"));
+        callback(new Error(this.validateError("城市")));
       } else {
         callback();
       }
@@ -150,7 +150,7 @@ export default {
 
     // 点击发布按钮时触发
     handleCreate() {
-      // console.log(this.form);
+      console.log(this.form);
       this.$refs.form.validate(valid => {
         if (valid) {
           // 新增文章请求
@@ -167,15 +167,19 @@ export default {
             }
           }).then(res => {
             const { data } = res.data;
-            console.log(data);
+            console.log(res);
+            // if (res.statusCode === 400) {
+            // axios.js的400编码错误信息提示 注释起来了
+            //   Message.error(message);
+            // }
             this.$message({
               message: "新增成功",
               type: "success"
             });
             // 清空表单内容
-            // this.form.title = "";
-            // this.form.content = "";
-            // this.form.city = "";
+            this.form.title = "";
+            this.form.content = "";
+            this.form.city = "";
           });
         }
       });
