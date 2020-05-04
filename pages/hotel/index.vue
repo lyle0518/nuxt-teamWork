@@ -379,7 +379,7 @@ export default {
     }
     // 处理page参数
     if (this.$route.query.page) {
-      other._start = (page - 1) * 5;
+      other._start = (this.$route.query.page - 1) * 5;
     }
     if (this.$route.query.enterTime) {
       other.enterTime = this.$route.query.enterTime;

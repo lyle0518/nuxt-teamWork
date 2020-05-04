@@ -2,7 +2,7 @@
   <div>
     <el-row class="item" @click.native="handle">
       <el-col :span="8" class="item-left">
-        <nuxt-link to="#">
+        <nuxt-link :to="`hotel/${data.id}`">
           <img :src="data.photos" />
         </nuxt-link>
       </el-col>
