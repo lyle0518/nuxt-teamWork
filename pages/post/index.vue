@@ -93,7 +93,6 @@ export default {
 	},
 	mounted() {
 		this.$router.push({
-			// path:'/post',
 			query: {
 				start: 0,
 				limit: 3
@@ -149,7 +148,6 @@ export default {
 				const { data } = res.data;
 				this.lists = data;
 				// this.list = data.slice((this.pageIndex - 1 )* this.pageSize,this.pageIndex * this.pageSize);
-				// console.log(this.list);
 			});
 		},
 		recommedCity(data) {
