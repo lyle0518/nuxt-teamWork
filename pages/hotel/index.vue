@@ -90,18 +90,28 @@
       </el-form>
     </div>
     <!-- 地图部分 -->
-    <el-row style="height:260px">
+    <el-row>
       <el-col :span="14">
         <div class="left">
           <el-row style="margin-bottom:20px">
             <el-col :span="3">区域:</el-col>
-            <el-col :span="21" class="area">
+            <el-col :span="21">
               <!-- 需要循环处理的数据 -->
-              <a
-                href="#"
-                v-for="(item, index) in $store.state.hotel.area"
-                :key="index"
-              >{{ item.name }}</a>
+              <div class="area" :style="`height:${height}`">
+                <a
+                  href="#"
+                  v-for="(item, index) in $store.state.hotel.area"
+                  :key="index"
+                  class="hotLocation"
+                >{{ item.name }}</a>
+              </div>
+
+              <div class="clickLocation" @click="clickLocation">
+                <i class="el-icon-d-arrow-left iconBottom" v-if="show"></i>
+                <i class="el-icon-d-arrow-left iconTop" v-else></i>
+
+                <span>等{{$store.state.hotel.area.length}}个区域</span>
+              </div>
             </el-col>
           </el-row>
           <el-row>
@@ -309,7 +319,7 @@
       <p>暂无符合条件的酒店</p>
     </el-row>
     <!-- 分页器 -->
-    <el-row v-if="$store.state.hotel.hotelList.length > 0">
+    <el-row v-if="$store.state.hotel.hotelList.length > 0" class="page">
       <el-pagination layout="prev, pager, next" :pager-count="5" :total="total"></el-pagination>
     </el-row>
   </div>
@@ -456,7 +466,9 @@ export default {
       value2: "",
       // 乘车框value值
       peopleNum: "",
-
+      //区域的参数
+      show: true,
+      height: "36px",
       //分割线---
       // 画图的参数
       //纬度
@@ -652,6 +664,16 @@ export default {
     //     this.getMap();
     //   });
     // },
+    //控制区域显示数量
+    clickLocation() {
+      this.show = !this.show;
+      // 判断show值操控dom元素的高度
+      if (this.show) {
+        this.height = "36px";
+      } else {
+        this.height = "";
+      }
+    },
     // 请求酒店选项
     getOption() {
       this.$axios({
@@ -971,7 +993,7 @@ export default {
     setTimeout(() => {
       console.log(this.$store.state.hotel.hotelList);
       this.getMap();
-    }, 10);
+    }, 500);
 
     // 请求酒店选项
     this.getOption();
@@ -1021,20 +1043,32 @@ export default {
 }
 //区域样式
 .area {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+  line-height: 18px;
+
   overflow: hidden;
-  width: 80%;
+
   a {
     display: inline-block;
   }
 }
+.clickLocation {
+  cursor: pointer;
+  .iconBottom {
+    color: #f90;
+    transform: rotate(-90deg);
+  }
+  .iconTop {
+    color: #f90;
+    transform: rotate(90deg);
+  }
+}
+
 // 地图样式
 #container {
   width: 420px;
   height: 260px;
 }
+
 .filter2 {
   border: 1px solid #ddd;
   margin: 10px 0;
@@ -1077,6 +1111,9 @@ export default {
   padding: 30px 0;
   text-align: center;
 }
-
+.page {
+  text-align: right;
+  margin: 30px 0;
+}
 //标记的样式
 </style>
