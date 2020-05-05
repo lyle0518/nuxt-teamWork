@@ -167,7 +167,6 @@ export default {
 		this.$axios({
 			url: '/posts/cities'
 		}).then(res => {
-			// console.log(res);
 			const { data } = res.data;
 			this.likeList = data;
 		});	
