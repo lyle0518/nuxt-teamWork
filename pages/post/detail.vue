@@ -15,7 +15,7 @@
             <!-- 阅读量、时间 -->
             <el-col :span="24" class="text">
               <span>攻略：{{detail.created_at}}</span>
-              <span>阅读：{{detail.watch}}</span>
+              <span>阅读：{{detail.watch?detail.watch:'0'}}</span>
             </el-col>
             <!-- 文章内容 -->
             <div class="postContent" v-html="detail.content"></div>
@@ -100,7 +100,7 @@
                     <p>{{item.content}}</p>
 
                     <!-- 图片大图预览组件 -->
-                    <div v-if="item.pics.length > 0">
+                    <div v-if="item.pics.length > 0" style="display:flex;">
                       <div
                         class="demo-image__preview"
                         v-for="(item,index) in item.pics"
@@ -114,8 +114,13 @@
                       </div>
                     </div>
                   </div>
-                  <div class="replyURL">
-                    <a href="javascript:;" @click="handleReply(item)">回复</a>
+
+                  <div style="height:20px;">
+                    <div @mouseenter="item.replyShow= true">
+                      <div class="replyURL" @mouseleave="item.replyShow = false">
+                        <a href="javascript:;" @click="handleReply(item)" v-if="item.replyShow">回复</a>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -156,7 +161,7 @@
               </div>
               <div class="right">
                 <h4>{{item.title}}</h4>
-                <div class="strategyText">攻略：{{item.created_at}} 阅读：{{item.watch}}</div>
+                <div class="strategyText">攻略：{{item.created_at}} 阅读：{{item.watch?item.watch:'0'}}</div>
               </div>
             </nuxt-link>
           </div>
@@ -178,8 +183,7 @@ export default {
       //页面地址栏变化时重新请求数据
       this.getPostData();
       this.getCommentsData();
-    },
-    replySwith() {}
+    }
   },
   mounted() {
     this.getPostData();
@@ -216,6 +220,7 @@ export default {
 
       //@回复人标签
       replySwith: false, //         控制 标签显示/隐藏
+      replyShow: false,
       replyData: {
         account: { nickname: "" }
       },
@@ -347,8 +352,10 @@ export default {
         this.commentTotal = total;
         this.postCommentsData = data.map(v => {
           v.created_at = moment(v.created_at).format("YYYY-MM-DD hh:mm");
+          v.replyShow = false;
           return v;
         });
+        this.$store.commit("post/setparentData", this.postCommentsData);
       });
     }
   },
@@ -517,17 +524,6 @@ export default {
             word-break: break-all;
           }
         }
-        // .reply {
-        //   .reply-item {
-        //     padding: 4px;
-        //     font-size: 12px;
-        //     background: #f9f9f9;
-        //     border: 1px #ccc solid;
-        //   }
-        //   .date {
-        //     color: #ccc;
-        //   }
-        // }
       }
       .zeroComment {
         line-height: 100px;
