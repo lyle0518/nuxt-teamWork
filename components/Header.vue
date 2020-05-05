@@ -10,10 +10,10 @@
 
       <!-- 菜单栏 -->
       <el-row type="flex" class="navs">
-        <nuxt-link to="/">首页</nuxt-link>
-        <nuxt-link to="/post?start=0&limit=3" :class="actives?'actives':''">旅游攻略</nuxt-link>
-        <nuxt-link to="/hotel">酒店</nuxt-link>
-        <nuxt-link to="/air">国内机票</nuxt-link>
+        <nuxt-link to="/" :class="index === 0?'actives':''">首页</nuxt-link>
+        <nuxt-link to="/post?start=0&limit=3" :class="index === 1?'actives':''">旅游攻略</nuxt-link>
+        <nuxt-link to="/hotel" :class="index === 2?'actives':''">酒店</nuxt-link>
+        <nuxt-link to="/air" :class="index === 3?'actives':''">国内机票</nuxt-link>
       </el-row>
 
       <!-- 登录后的用户信息 -->
@@ -65,7 +65,8 @@
 export default {
 	data(){
 		return {
-			actives:false
+			actives:false,
+			index:999
 		}
 	},
   methods: {
@@ -76,11 +77,23 @@ export default {
     }
   },
 	watch:{
-		'$route.query'(){
-				if(this.$route.query.limit || this.$route.query.id || this.$route.path === '/post/create'){
-					this.actives = true
-				}else{
-					this.actives = false
+		$route(){
+				// if(this.$route.query.limit || this.$route.query.id || this.$route.path === '/post/create'){
+				// 	this.actives = true
+				// }else{
+				// 	this.actives = false
+				// }
+				if(this.$route.name == 'index'){
+					this.index = 0
+				}
+				if(this.$route.name.indexOf('post') > -1){
+					this.index = 1
+				}
+				if(this.$route.name.indexOf('hotel') > -1){
+					this.index = 2
+				}
+				if(this.$route.name.indexOf('air') > -1){
+					this.index = 3
 				}
 		}
 	}

@@ -140,8 +140,8 @@ export default {
 			}
 			this.$router.push({
 				query: {
-					start: 0,
-					limit: 3,
+					start: (this.pageIndex - 1) * this.pageSize,
+					limit: this.pageSize,
 					city:this.$store.state.post.city
 				}
 			});
@@ -152,8 +152,8 @@ export default {
 			}
 			this.$router.push({
 				query: {
-					start: 0,
-					limit: 3
+					start: (this.pageIndex - 1) * this.pageSize,
+					limit: this.pageSize,
 				}
 			});
 		}
@@ -167,7 +167,6 @@ export default {
 		this.$axios({
 			url: '/posts/cities'
 		}).then(res => {
-			// console.log(res);
 			const { data } = res.data;
 			this.likeList = data;
 		});	
