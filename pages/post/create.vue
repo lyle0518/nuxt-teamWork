@@ -216,11 +216,14 @@ export default {
 
     // 保存到草稿箱
     saveDraft() {
+      
       // 将表单信息存储到store的仓库中
       const time = moment().format("YYYY-MM-DD");
       this.form.timeDate = time;
       // console.log(this.form);
+      const list = {...this.form}
       this.$store.commit("post/setDraftList", this.form);
+      this.form = list;
     },
 
     handleClick(item) {
