@@ -176,10 +176,11 @@ export default {
               message: "新增成功",
               type: "success"
             });
-            // 清空表单内容
-            this.form.title = "";
-            this.form.content = "";
-            this.form.city = "";
+            // // 清空表单内容
+            // this.form.title = "";
+            // this.form.content = "";
+            // this.form.city = "";
+            this.$router.push("/post");
           });
         }
       });
@@ -216,17 +217,17 @@ export default {
 
     // 保存到草稿箱
     saveDraft() {
-      
       // 将表单信息存储到store的仓库中
       const time = moment().format("YYYY-MM-DD");
       this.form.timeDate = time;
       // console.log(this.form);
-      const list = {...this.form}
+      const list = { ...this.form };
       this.$store.commit("post/setDraftList", this.form);
       this.form = list;
     },
 
     handleClick(item) {
+      // 草稿箱数据回显
       // console.log(this.form);
       this.form.title = item.title;
       this.form.content = item.content;

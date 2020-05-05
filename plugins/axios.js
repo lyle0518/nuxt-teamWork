@@ -6,7 +6,7 @@ export default nuxt => {
   nuxt.$axios.onError(err => {
     const { statusCode, message } = err.response.data;
     if (statusCode === 400) {
-      //   Message.error(message);
+        Message.error(message);
       console.log(111);
     }
     if (statusCode === 401) {
