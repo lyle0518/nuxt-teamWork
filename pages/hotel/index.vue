@@ -192,10 +192,10 @@
         <el-col :span="24" class="col-item-first">
           <span>价格</span>
           <!-- 双向数据绑定 -->
-          <span style="float:right">0-{{ price }}</span>
+          <span style="float:right">0-{{pushUrl.price_lt }}</span>
         </el-col>
         <el-col :span="24" class="col-item-first">
-          <el-slider v-model="price" :max="4000"></el-slider>
+          <el-slider v-model="pushUrl.price_lt " :max="4000" @change="changePrice"></el-slider>
         </el-col>
       </el-col>
 
@@ -326,7 +326,7 @@
     <el-row v-if="$store.state.hotel.hotelData.data.length > 0" class="page">
       <el-pagination
         @current-change="handleCurrentChange"
-        :current-page="$store.state.hotel.total"
+        :current-page="$store.state.hotel.pageSize"
         :page-size="10"
         layout="prev, pager, next"
         :pager-count="5"
@@ -435,13 +435,7 @@ export default {
   },
   data() {
     return {
-      pageSize: 1, //当前的页数
-
       title: "酒店预订",
-      //条数
-      _limit: 1,
-      //开始页数
-      _start: 0,
       //入住人数
       person: 1,
       // 城市的id-请求参数
@@ -518,7 +512,6 @@ export default {
       // 人数
       people: "",
       visible: false,
-      price: 4000,
       //分割线--------------
       //酒店选项
       levels: [], //等级
@@ -599,7 +592,7 @@ export default {
     handleCurrentChange(val) {
       // 跳转页面 追加页码\
       this.pushUrl.page = Number(val);
-      this.$store.commit("hotel/setTotal", Number(val));
+      this.$store.commit("hotel/setPageSize", Number(val));
       this.$router.push({
         path: "/hotel",
         query: this.pushUrl
@@ -1072,27 +1065,34 @@ export default {
           }
         }
       });
+    },
+    changePrice() {
+      this.$router.push({
+        path: "/hotel",
+        query: this.pushUrl
+      });
     }
   },
   mounted() {
     // 刷新进来的时候通过url请求数据
     setTimeout(() => {
       this.getMap();
-    }, 1000);
+    }, 100);
 
     // 请求酒店选项
     this.getOption();
-    this.pushUrl.price_lt = this.price;
     console.log(this.$route.query.cityName);
     // 处理页面刷新是的title的值
     const {
       cityName,
+      price_lt,
       hotellevel,
       hoteltype,
       hotelasset,
       hotelbrand,
       ...other
     } = this.$route.query;
+
     if (cityName) {
       this.title = `${cityName}酒店预订`;
     } else {
@@ -1100,6 +1100,9 @@ export default {
       setTimeout(() => {
         this.getLocation();
       }, 1000);
+    }
+    if (price_lt) {
+      this.pushUrl.price_lt = Number(price_lt);
     }
     if (hotellevel) {
       this.pushUrl.hotellevel = hotellevel;

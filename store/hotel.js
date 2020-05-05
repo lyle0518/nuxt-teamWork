@@ -16,7 +16,7 @@ export const state = function() {
     //地图中心点数据
     latitude: "", //纬度
     longitude: "", //经度
-    total: 1
+    pageSize: 1
   };
 };
 export const mutations = {
@@ -38,7 +38,7 @@ export const mutations = {
   setLongitude(state, data) {
     state.longitude = data;
   },
-  setTotal(state, data) {
+  setPageSize(state, data) {
     state.total = data;
   }
 };
