@@ -362,7 +362,7 @@ export default {
       }
     }).then(res => {
       const { data } = res.data;
-
+      this.$store.commit("hotel/setArea", data[0].scenics);
       data.forEach(v => {
         if (v.name === this.$route.query.cityName) {
           other.city = v.id;
