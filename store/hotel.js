@@ -1,6 +1,8 @@
 export const state = function() {
   return {
-    hotelList: "",
+    hotelData: {
+      data: []
+    }, //酒店请求的详细数据
     pushUrl: {
       //切换城市
       cityName: "",
@@ -13,12 +15,13 @@ export const state = function() {
     area: [],
     //地图中心点数据
     latitude: "", //纬度
-    longitude: "" //经度
+    longitude: "", //经度
+    total: 1
   };
 };
 export const mutations = {
-  setHotelList(state, data) {
-    state.hotelList = data;
+  setHotelData(state, data) {
+    state.hotelData = data;
   },
   setPushUrl(state, data) {
     state.hotelForm = data;
@@ -34,5 +37,8 @@ export const mutations = {
   },
   setLongitude(state, data) {
     state.longitude = data;
+  },
+  setTotal(state, data) {
+    state.total = data;
   }
 };
