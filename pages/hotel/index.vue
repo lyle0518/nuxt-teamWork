@@ -1,9 +1,5 @@
 <template>
   <div class="hotel">
-    <script
-      type="text/javascript"
-      src="https://webapi.amap.com/maps?v=1.4.15&key=1ea10649493202a3fe81c42b68584b65&&plugin=AMap.CitySearch"
-    ></script>
     <div class="title">
       <!-- 修改:要用图标分隔符 -->
       <nuxt-link to="#">酒店</nuxt-link>
@@ -408,23 +404,33 @@ export default {
       //   });
       // }
       this.$store.commit("hotel/setHotelData", data);
-      if (this.$store.state.hotel.hotelData.data.length < 1) {
-        // 重新画图
-        this.getMap();
-      } else {
-        // 如果此时lenth大于1,说明数据被修改了,修改中心点的值
-        this.$store.commit(
-          "hotel/setLatitude",
-          this.$store.state.hotel.hotelData.data[0].location.latitude
-        );
-        this.$store.commit(
-          "hotel/setLongitude",
-          this.$store.state.hotel.hotelData.data[0].location.longitude
-        );
-        setTimeout(() => {
+      setTimeout(() => {
+        if (this.$store.state.hotel.hotelData.data.length < 1) {
+          // 重新画图
           this.getMap();
-        }, 100);
-      }
+          console.log("长度小于一重新画图");
+        } else {
+          // 如果此时lenth大于1,说明数据被修改了,修改中心点的值
+          this.$store.commit(
+            "hotel/setLatitude",
+            this.$store.state.hotel.hotelData.data[0].location.latitude
+          );
+          this.$store.commit(
+            "hotel/setLongitude",
+            this.$store.state.hotel.hotelData.data[0].location.longitude
+          );
+          console.log("长度大于一重新画图");
+          console.log();
+
+          this.getMap();
+          var url =
+            "https://webapi.amap.com/maps?v=1.4.15&key=1ea10649493202a3fe81c42b68584b65&plugin=AMap.CitySearch&callback=onLoad";
+          var jsapi = document.createElement("script");
+          jsapi.charset = "utf-8";
+          jsapi.src = url;
+          document.head.appendChild(jsapi);
+        }
+      }, 400);
     });
 
     // this.getList();
@@ -999,7 +1005,6 @@ export default {
     // 生成地图
     getMap() {
       // 随机获取一个酒店的地点作为地图的中心点
-
       if (this.$store.state.hotel.hotelData.data.length > 1) {
         this.$store.commit(
           "hotel/setLatitude",
@@ -1010,34 +1015,37 @@ export default {
           this.$store.state.hotel.hotelData.data[0].location.longitude
         );
       }
+      console.log(this.$store.state.hotel.latitude);
 
-      var map = new AMap.Map("container", {
-        zoom: 11, //级别
-        center: [
-          this.$store.state.hotel.longitude,
-          this.$store.state.hotel.latitude
-        ], //中心点坐标
-        // center: [113.3245904, 23.1066805], //中心点坐标
-
-        viewMode: "3D", //使用3D视图
-        resizeEnable: true
-      });
-
-      //画点标记 --从仓库循环
-      if (this.$store.state.hotel.hotelData.data.length > 1) {
-        this.$store.state.hotel.hotelData.data.forEach((item, index) => {
-          const hotelLatitude = item.location.latitude;
-          const hotelLongitude = item.location.longitude;
-          var content = `<span class="marker">${index}</span>`;
-          var marker = new AMap.Marker({
-            content: content,
-            position: new AMap.LngLat(hotelLongitude, hotelLatitude), // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
-            title: `${item.name}`,
-            offset: new AMap.Pixel(-17, -42)
-          });
-          map.add(marker);
+      window.onLoad = () => {
+        var map = new AMap.Map("container", {
+          zoom: 11, //级别
+          center: [
+            this.$store.state.hotel.longitude,
+            this.$store.state.hotel.latitude
+          ], //中心点坐标
+          // center: [113.3245904, 23.1066805], //中心点坐标
+          viewMode: "3D", //使用3D视图
+          resizeEnable: true
         });
-      }
+        console.log("此时的中心点" + this.$store.state.hotel.latitude);
+
+        //画点标记 --从仓库循环
+        if (this.$store.state.hotel.hotelData.data.length > 1) {
+          this.$store.state.hotel.hotelData.data.forEach((item, index) => {
+            const hotelLatitude = item.location.latitude;
+            const hotelLongitude = item.location.longitude;
+            var content = `<span class="marker">${index}</span>`;
+            var marker = new AMap.Marker({
+              content: content,
+              position: new AMap.LngLat(hotelLongitude, hotelLatitude), // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
+              title: `${item.name}`,
+              offset: new AMap.Pixel(-17, -42)
+            });
+            map.add(marker);
+          });
+        }
+      };
 
       // 根据酒店的数量生成对应的标记标到地图上
 
@@ -1058,7 +1066,6 @@ export default {
             // cityinfo --当前城市
             // 定位发送城市的请求
             const data = this.getCity(cityinfo);
-
             this.mapCity = cityinfo;
             this.getMap();
             this.open();
@@ -1075,10 +1082,13 @@ export default {
   },
   mounted() {
     // 刷新进来的时候通过url请求数据
-    setTimeout(() => {
-      this.getMap();
-    }, 100);
-
+    this.getMap();
+    var url =
+      "https://webapi.amap.com/maps?v=1.4.15&key=1ea10649493202a3fe81c42b68584b65&plugin=AMap.CitySearch&callback=onLoad";
+    var jsapi = document.createElement("script");
+    jsapi.charset = "utf-8";
+    jsapi.src = url;
+    document.head.appendChild(jsapi);
     // 请求酒店选项
     this.getOption();
     console.log(this.$route.query.cityName);
