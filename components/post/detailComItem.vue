@@ -20,8 +20,13 @@
             ></el-image>
           </div>
         </div>
-        <div class="replyURL">
-          <a href="javascript:;" @click="handleReply(data)">回复</a>
+
+        <div class="replyBtn">
+          <div class="show">
+            <div class="hide">
+              <a href="javascript:;" @click="handleReply(data)">回复</a>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -76,6 +81,25 @@ export default {
   margin-left: 20px;
   font-size: 14px;
   word-break: break-all;
+}
+
+.replyBtn {
+  height: 20px;
+  .show {
+    height: 100%;
+  }
+  .show:hover {
+    .hide {
+      display: block;
+      padding-bottom: 10px;
+      text-align: right;
+      padding-right: 10px;
+      color: #1e50a2;
+    }
+  }
+  .hide {
+    display: none;
+  }
 }
 
 /deep/.el-image {

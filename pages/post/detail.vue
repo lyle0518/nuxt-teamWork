@@ -115,10 +115,10 @@
                     </div>
                   </div>
 
-                  <div style="height:20px;">
-                    <div @mouseenter="item.replyShow= true">
-                      <div class="replyURL" @mouseleave="item.replyShow = false">
-                        <a href="javascript:;" @click="handleReply(item)" v-if="item.replyShow">回复</a>
+                  <div class="replyBtn">
+                    <div class="show">
+                      <div class="hide">
+                        <a href="javascript:;" @click="handleReply(item)">回复</a>
                       </div>
                     </div>
                   </div>
@@ -352,10 +352,8 @@ export default {
         this.commentTotal = total;
         this.postCommentsData = data.map(v => {
           v.created_at = moment(v.created_at).format("YYYY-MM-DD hh:mm");
-          v.replyShow = false;
           return v;
         });
-        this.$store.commit("post/setparentData", this.postCommentsData);
       });
     }
   },
@@ -510,12 +508,25 @@ export default {
           .date {
             color: #ccc;
           }
-          .replyURL {
-            font-size: 12px;
-            padding-bottom: 10px;
-            text-align: right;
-            padding-right: 10px;
-            color: #1e50a2;
+
+          .replyBtn {
+            height: 20px;
+            .show {
+              height: 100%;
+              font-size: 12px;
+            }
+            .show:hover {
+              .hide {
+                display: block;
+                padding-bottom: 10px;
+                text-align: right;
+                padding-right: 10px;
+                color: #1e50a2;
+              }
+            }
+            .hide {
+              display: none;
+            }
           }
           .txt {
             padding: 8px 0;
