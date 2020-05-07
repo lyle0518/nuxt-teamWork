@@ -78,9 +78,7 @@ export default {
     };
   },
   methods: {
-    handle() {
-      console.log(this.data);
-    }
+    handle() {}
   }
 };
 </script>

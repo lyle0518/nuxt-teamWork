@@ -10,7 +10,10 @@
         <el-row type="flex" justify="space-between" align="middle" class="pay-qrcode">
           <div class="qrcode">
             <!-- 二维码 -->
-            <canvas id="qrcode-stage"></canvas>
+            <div>
+              <img src="../../static/pay.png" alt />
+            </div>
+            <!-- <canvas id="qrcode-stage"></canvas> -->
             <p>请使用微信扫一扫</p>
             <p>扫描二维码支付</p>
           </div>

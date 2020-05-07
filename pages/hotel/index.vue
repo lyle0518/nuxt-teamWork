@@ -326,7 +326,7 @@
         :page-size="10"
         layout="prev, pager, next"
         :pager-count="5"
-        :total="$store.state.hotel.hotelData.total"
+        :total="$store.state.hotel.total"
       ></el-pagination>
     </el-row>
   </div>
@@ -394,8 +394,9 @@ export default {
     }).then(res => {
       // 存到本地的仓库
       const { data } = res;
-      console.log(res.data);
-      this.total = data.total;
+      console.log(data.total);
+
+      this.$store.commit("hotel/setTotal", data.total);
       // if (data) {
       //   //  获取仓库旧的数据
       //   const storeLocation = this.$store.state.hotel.hotelList[0].location;
@@ -408,7 +409,6 @@ export default {
         if (this.$store.state.hotel.hotelData.data.length < 1) {
           // 重新画图
           this.getMap();
-          console.log("长度小于一重新画图");
         } else {
           // 如果此时lenth大于1,说明数据被修改了,修改中心点的值
           this.$store.commit(
@@ -419,8 +419,6 @@ export default {
             "hotel/setLongitude",
             this.$store.state.hotel.hotelData.data[0].location.longitude
           );
-          console.log("长度大于一重新画图");
-          console.log();
 
           this.getMap();
           var url =
@@ -665,8 +663,6 @@ export default {
       //将表单存到仓库 此时form城市id值不对
       // const { cityName, ...other } = this.form;
       // other.city = this.city;
-      // console.log(this.city);
-      // console.log(other);
       // this.$store.commit("hotel/setHotelForm", other);
     },
 
@@ -748,7 +744,6 @@ export default {
             hotellevel.forEach(v => {
               //修改checked属性
               this.levels[v - 1].checked = true;
-              console.log(this.levels[v - 1].checked);
               //修改levelist里面的数据
               this.leveList.push(Number(v));
             });
@@ -844,10 +839,7 @@ export default {
     //酒店星级筛选
     handleLeves(item, index) {
       //静态样式
-      console.log(item);
       //查询名字修改'不限字样'
-
-      console.log("刚点击时的", this.leveList);
 
       const res = this.leveList.indexOf(item.level);
       if (res > -1) {
@@ -857,7 +849,6 @@ export default {
         //  追加
         this.leveList.push(item.level);
       }
-      console.log("查找index后的", this.leveList);
 
       if (this.leveList.length > 1) {
         this.leveValue = `已选${this.leveList.length}项`;
@@ -867,12 +858,10 @@ export default {
       } else if (this.leveList.length === 0) {
         this.leveValue = "不限";
       }
-      console.log("跳转前的列表", this.leveList);
 
       // 将leveList里的数据赋值给pushUrl当前数组中是否已有该id
 
       this.pushUrl.hotellevel = this.leveList;
-      console.log("pushUrl的值", this.pushUrl.hotellevel);
 
       // 跳转页面;触发路由守卫,重新请求getList,传递form的参数,更改cityName的值
       this.$router.push({
@@ -909,8 +898,6 @@ export default {
     },
     //酒店设施筛选
     handleAssets(item, index) {
-      console.log(item);
-
       const res = this.assetsList.indexOf(item.id);
       if (res > -1) {
         // 已经存在
@@ -941,8 +928,6 @@ export default {
     },
     //酒店品牌筛选
     handleBrands(item, index) {
-      console.log(item);
-
       const res = this.brandsList.indexOf(item.id);
       if (res > -1) {
         // 已经存在
@@ -959,7 +944,6 @@ export default {
         const Data = this.brands.filter(v => {
           return v.id == this.brandsList[0];
         });
-        console.log("Data", Data);
         this.brandsValue = Data[0].name;
       } else if (this.brandsList.length === 0) {
         this.brandsValue = "不限";
@@ -1015,7 +999,6 @@ export default {
           this.$store.state.hotel.hotelData.data[0].location.longitude
         );
       }
-      console.log(this.$store.state.hotel.latitude);
 
       window.onLoad = () => {
         var map = new AMap.Map("container", {
@@ -1028,7 +1011,6 @@ export default {
           viewMode: "3D", //使用3D视图
           resizeEnable: true
         });
-        console.log("此时的中心点" + this.$store.state.hotel.latitude);
 
         //画点标记 --从仓库循环
         if (this.$store.state.hotel.hotelData.data.length > 1) {
@@ -1091,7 +1073,6 @@ export default {
     document.head.appendChild(jsapi);
     // 请求酒店选项
     this.getOption();
-    console.log(this.$route.query.cityName);
     // 处理页面刷新是的title的值
     const {
       cityName,

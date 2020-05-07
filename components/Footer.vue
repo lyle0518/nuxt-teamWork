@@ -3,7 +3,7 @@
     <div class="footer">
       <el-row class="info-list">
         <el-col :span="6" :offset="1">
-          <h5>闲云旅游旅游网</h5>
+          <h5>世途旅游旅游网</h5>
           <p>上亿旅行者共同打造的"旅行神器"</p>
           <p>
             <span>60,000</span> 多个全球旅游目的地
@@ -24,8 +24,8 @@
           <p>服务协议 游记协议</p>
           <p>商城平台服务协议</p>
           <p>网络信息侵权通知指引</p>
-          <p>闲云旅游旅游网服务监督员</p>
-          <p>网站地图加入闲云旅游</p>
+          <p>世途旅游旅游网服务监督员</p>
+          <p>网站地图加入世途旅游</p>
         </el-col>
         <el-col :span="5">
           <h5>旅行服务</h5>
@@ -42,9 +42,7 @@
         </el-col>
       </el-row>
 
-      <div
-        class="licence"
-      >京ICP备08001421号 京公网安备110108007702 Copyright © 2016-2019 博学谷 All Rights Reserved</div>
+      <div class="licence">京ICP备0000000号 00000000 Copyright © 2016-2019 xxxxx xxxxxx</div>
     </div>
   </div>
 </template>

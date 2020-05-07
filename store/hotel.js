@@ -16,7 +16,8 @@ export const state = function() {
     //地图中心点数据
     latitude: "", //纬度
     longitude: "", //经度
-    pageSize: 1
+    pageSize: 1, //当前页数
+    total: "" //总页数
   };
 };
 export const mutations = {
@@ -38,7 +39,10 @@ export const mutations = {
   setLongitude(state, data) {
     state.longitude = data;
   },
-  setPageSize(state, data) {
+  setTotal(state, data) {
     state.total = data;
+  },
+  setPageSize(state, data) {
+    state.pageSize = data;
   }
 };

@@ -3,9 +3,7 @@
     <el-row type="flex" justify="space-between" class="main">
       <!-- logo -->
       <div class="logo">
-        <nuxt-link to="/">
-          <img src="http://157.122.54.189:9093/images/logo.jpg" alt />
-        </nuxt-link>
+        <nuxt-link to="/"></nuxt-link>
       </div>
 
       <!-- 菜单栏 -->
@@ -63,12 +61,12 @@
 </template>
 <script>
 export default {
-	data(){
-		return {
-			actives:false,
-			index:999
-		}
-	},
+  data() {
+    return {
+      actives: false,
+      index: 999
+    };
+  },
   methods: {
     // 用户退出
     handleLogout() {
@@ -76,27 +74,27 @@ export default {
       this.$message.success("退出成功!");
     }
   },
-	watch:{
-		$route(){
-				// if(this.$route.query.limit || this.$route.query.id || this.$route.path === '/post/create'){
-				// 	this.actives = true
-				// }else{
-				// 	this.actives = false
-				// }
-				if(this.$route.name == 'index'){
-					this.index = 0
-				}
-				if(this.$route.name.indexOf('post') > -1){
-					this.index = 1
-				}
-				if(this.$route.name.indexOf('hotel') > -1){
-					this.index = 2
-				}
-				if(this.$route.name.indexOf('air') > -1){
-					this.index = 3
-				}
-		}
-	}
+  watch: {
+    $route() {
+      // if(this.$route.query.limit || this.$route.query.id || this.$route.path === '/post/create'){
+      // 	this.actives = true
+      // }else{
+      // 	this.actives = false
+      // }
+      if (this.$route.name == "index") {
+        this.index = 0;
+      }
+      if (this.$route.name.indexOf("post") > -1) {
+        this.index = 1;
+      }
+      if (this.$route.name.indexOf("hotel") > -1) {
+        this.index = 2;
+      }
+      if (this.$route.name.indexOf("air") > -1) {
+        this.index = 3;
+      }
+    }
+  }
 };
 </script>
 <style scoped lang="less">
@@ -115,16 +113,19 @@ export default {
 
   .logo {
     width: 156px;
-    padding-top: 8px;
-
-    img {
-      display: block;
-      width: 100%;
+    overflow: hidden;
+    a {
+      display: inline-block;
+      width: 156px;
+      height: 58px;
+      background: url("../static/logo.png") no-repeat 52% 35%;
+      background-size: 155px;
+      margin-left: 20px;
     }
   }
 
   .navs {
-    margin: 0 20px;
+    // margin: 0 20px;
     flex: 1;
 
     a {
@@ -190,11 +191,11 @@ export default {
     }
   }
 }
-.actives{
-	color: #fff;
-	background: #409eff;
-	 &:hover{
-		 color: #fff!important;
-	 }
+.actives {
+  color: #fff;
+  background: #409eff;
+  &:hover {
+    color: #fff !important;
+  }
 }
 </style>

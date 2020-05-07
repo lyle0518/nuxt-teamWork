@@ -28,8 +28,8 @@
 
         <!-- 输入框 -->
         <el-row type="flex" align="middle" class="search-input">
-          <input :placeholder="options[optionsIdx].placeholder" />
-          <i class="el-icon-search"></i>
+          <input :placeholder="options[optionsIdx].placeholder" v-model="value" />
+          <i class="el-icon-search" @click="handlePush(options[optionsIdx].lable)"></i>
         </el-row>
       </div>
     </div>
@@ -40,6 +40,7 @@
 export default {
   data() {
     return {
+      value: "",
       banners: [],
       options: [
         {
@@ -75,6 +76,32 @@ export default {
         return;
       }
       this.optionsIdx = index;
+    },
+    handlePush(item) {
+      if (item === "攻略") {
+        this.$router.push({
+          path: "post",
+          query: {
+            start: 0,
+            limit: 3
+          }
+        });
+      } else if (item === "酒店") {
+        this.$axios({
+          url: "/cities",
+          params: {
+            name: this.value
+          }
+        }).then(res => {
+          const { data } = res.data;
+          this.$router.push({
+            path: "/hotel",
+            query: {
+              cityName: data[0].name
+            }
+          });
+        });
+      }
     }
   }
 };
