@@ -4,7 +4,7 @@ export default {
    ** Headers of the page
    */
   head: {
-    title: "世界上最大的旅游网",
+    title: "世途旅游网",
     meta: [
       { charset: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -15,7 +15,7 @@ export default {
       }
     ],
     link: [
-      { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
+      { rel: "icon", type: "image/x-icon", href: "/bitbug_favicon.ico" },
       {
         rel: "stylesheet",
         type: "text/css",
